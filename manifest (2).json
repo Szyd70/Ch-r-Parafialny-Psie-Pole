@@ -1,0 +1,22 @@
+{
+  "name": "Schola Dziecięca",
+  "short_name": "Schola",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdf9",
+  "theme_color": "#118ab2",
+  "icons": [
+    {
+      "src": "1787475381723.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "1787475381723.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

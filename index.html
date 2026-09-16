@@ -3,43 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Podgląd PDF</title>
-  <!-- Wczytanie biblioteki PDF.js z CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <title>Aplikacja PDF</title>
   <style>
-    body { margin: 0; background-color: #525659; display: flex; justify-content: center; padding: 20px; }
-    #pdf-canvas { background: white; box-shadow: 0 0 10px rgba(0,0,0,0.3); max-width: 100%; height: auto; }
+    * { box-sizing: border-box; font-family: sans-serif; }
+    body { margin: 0; padding: 20px; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    .upload-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; width: 100%; max-width: 600px; }
+    input[type="file"] { margin-top: 10px; }
+    .pdf-viewer { width: 100%; max-width: 900px; height: 80vh; border: 1px solid #ccc; border-radius: 8px; background: #fff; display: none; }
   </style>
 </head>
 <body>
 
-  <canvas id="pdf-canvas"></canvas>
+  <div class="upload-container">
+    <h2>Dodaj i otwórz plik PDF</h2>
+    <input type="file" id="pdf-file" accept="application/pdf" />
+  </div>
+
+  <iframe id="pdf-frame" class="pdf-viewer"></iframe>
 
   <script>
-    // Ustawienie worker-a dla PDF.js
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const fileInput = document.getElementById('pdf-file');
+    const pdfFrame = document.getElementById('pdf-frame');
 
-    // Podmień na bezpośredni adres URL do swojego pliku PDF
-    const url = 'TUTAJ_WKLEJ_BEZPOŚREDNI_LINK_DO_PDF';
-
-    // Pobranie i renderowanie 1. strony
-    pdfjsLib.getDocument(url).promise.then(pdf => {
-      return pdf.getPage(1);
-    }).then(page => {
-      const scale = 2.0; // Wyższa skala = ostra jakość nut
-      const viewport = page.getViewport({ scale: scale });
-
-      const canvas = document.getElementById('pdf-canvas');
-      const context = canvas.getContext('2d');
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-
-      page.render({
-        canvasContext: context,
-        viewport: viewport
-      });
-    }).catch(err => {
-      console.error('Błąd wczytywania PDF:', err);
+    fileInput.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      
+      if (file && file.type === 'application/pdf') {
+        const fileURL = URL.createObjectURL(file);
+        pdfFrame.src = fileURL;
+        pdfFrame.style.display = 'block';
+      } else {
+        alert('Wybierz poprawny plik w formacie PDF.');
+      }
     });
   </script>
 

@@ -1,43 +1,1449 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Podgląd PDF</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Śpiewnik Psie Pole</title>
+  
+  <link rel="icon" type="image/png" href="IMG_20260906_111651.jpg">
+  <link rel="apple-touch-icon" href="IMG_20260906_111651.jpg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#1a2530">
+
+  <!-- Szlachetne kroje pism -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Biblioteka PDF.js do renderowania nut bezpośrednio w canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
-    * { box-sizing: border-box; font-family: sans-serif; }
-    body { margin: 0; padding: 15px; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-    .upload-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; margin-bottom: 15px; width: 100%; max-width: 600px; }
-    .pdf-viewer { width: 100%; max-width: 900px; height: 80vh; border: 1px solid #ccc; border-radius: 8px; background: #fff; display: none; }
+    :root {
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --primary: #1a2530;
+      --primary-hover: #2c3e50;
+      --accent-gold: #c5a059;
+      --accent-gold-light: #fdfbf7;
+      --accent-red: #a84242;
+      --text: #1f2937;
+      --text-sub: #6b7280;
+      --border: #e5e7eb;
+      --chords-bg: #f0f4f8;
+      --chords-text: #0f4c81;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      --announcement-bg: #fdfbf7;
+      --announcement-border: #e2d1b0;
+    }
+
+    [data-theme="dark"] {
+      --bg: #111827;
+      --card-bg: #1f2937;
+      --primary: #93c5fd;
+      --primary-hover: #bfdbfe;
+      --accent-gold: #d4af37;
+      --accent-gold-light: #1e2530;
+      --accent-red: #f87171;
+      --text: #f3f4f6;
+      --text-sub: #9ca3af;
+      --border: #374151;
+      --chords-bg: #111827;
+      --chords-text: #60a5fa;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      --announcement-bg: #1c222d;
+      --announcement-border: #4a3e28;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px 16px; display: flex; justify-content: center; transition: background 0.3s, color 0.3s; }
+    .container { width: 100%; max-width: 540px; }
+
+    .header-top { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 20px; 
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-controls { display: flex; gap: 8px; }
+    h1 { 
+      font-family: 'Playfair Display', Georgia, serif; 
+      color: var(--primary); 
+      font-size: 1.5rem; 
+      font-weight: 700; 
+      letter-spacing: -0.2px; 
+    }
+
+    .banner-container {
+      width: 100%;
+      height: 220px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      background-color: var(--announcement-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+
+    .banner-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .announcement-box {
+      background-color: var(--announcement-bg);
+      border: 1px solid var(--announcement-border);
+      border-left: 4px solid var(--accent-gold);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    .announcement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .announcement-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .announcement-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      background-color: var(--card-bg);
+      color: var(--text);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+    }
+    .btn:hover { border-color: var(--accent-gold); }
+    .btn:active { transform: scale(0.99); }
+    
+    .btn-filled { background-color: var(--primary); color: #ffffff; border-color: var(--primary); }
+    [data-theme="dark"] .btn-filled { color: #111827; }
+    .btn-secondary { background-color: var(--card-bg); border-color: var(--border); color: var(--text); }
+    .btn-danger { border-color: var(--accent-red); color: var(--accent-red); }
+    .btn-small { width: auto; padding: 6px 12px; font-size: 0.8rem; margin-bottom: 0; border-radius: 6px; font-weight: 500; }
+
+    .hidden { display: none !important; }
+
+    .song-item, .archive-item {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+      gap: 8px;
+      transition: border-color 0.2s ease;
+    }
+    .song-item:hover { border-color: var(--accent-gold); }
+    .song-title-btn {
+      background: none; border: none; color: var(--text);
+      font-size: 1rem; font-weight: 600; text-align: left;
+      flex-grow: 1; cursor: pointer;
+    }
+    .song-category { 
+      font-size: 0.72rem; 
+      color: var(--accent-gold); 
+      display: inline-block; 
+      margin-top: 4px;
+      background: var(--accent-gold-light);
+      border: 1px solid var(--announcement-border);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .role-badge {
+      font-size: 0.72rem;
+      color: #ffffff;
+      background-color: var(--accent-gold);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 6px;
+      text-transform: uppercase;
+    }
+
+    .input-field, .select-field {
+      width: 100%; padding: 12px 14px; margin-bottom: 12px;
+      background-color: var(--card-bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; font-size: 0.95rem;
+      outline: none; transition: border-color 0.2s ease;
+    }
+    .select-field {
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      border-radius: 6px;
+      width: auto;
+      margin-bottom: 0;
+      font-weight: 500;
+    }
+    .input-field:focus, .select-field:focus { border-color: var(--accent-gold); }
+    textarea.input-field { height: 120px; resize: vertical; }
+    textarea#form-bulk-text { height: 260px; font-family: monospace; font-size: 0.85rem; }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-container input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-gold);
+      cursor: pointer;
+    }
+
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .nav-bar h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+
+    .cat-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; }
+    .cat-chip {
+      background: var(--card-bg); border: 1px solid var(--border); color: var(--text-sub);
+      padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; white-space: nowrap; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cat-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); font-weight: 600; }
+    [data-theme="dark"] .cat-chip.active { color: #111827; }
+
+    .song-lyrics { white-space: pre-wrap; font-size: 1.1rem; line-height: 1.7; margin-top: 16px; font-family: 'Inter', sans-serif; }
+    .song-chords {
+      white-space: pre-wrap; font-family: monospace; font-size: 1.05rem;
+      color: var(--chords-text); background: var(--chords-bg); padding: 14px;
+      border-radius: 8px; margin-top: 12px; display: none; font-weight: 600;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .capo-badge {
+      display: inline-block;
+      background: var(--accent-gold-light);
+      border: 1px solid var(--announcement-border);
+      color: var(--accent-gold);
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .controls-panel { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 6px; 
+      margin-top: 16px; 
+      padding-top: 12px; 
+      border-top: 1px solid var(--border); 
+      position: sticky;
+      top: 10px;
+      background: var(--bg);
+      z-index: 10;
+      padding-bottom: 8px;
+    }
+
+    .pdf-viewer-container {
+      margin-top: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pdf-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .pdf-canvas-wrapper {
+      width: 100%;
+      overflow: auto;
+      max-height: 70vh;
+      display: flex;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #525659;
+    }
+    canvas { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+    audio { width: 100%; margin-top: 12px; border-radius: 8px; }
+
+    .pdf-iframe-wrapper {
+      width: 100%;
+      height: 70vh;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .pdf-iframe-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
 
-  <div class="upload-container">
-    <h2>Otwórz PDF z adresu URL</h2>
-    <input type="text" id="pdf-url" placeholder="Wklej bezpośredni URL do pliku PDF" style="width: 80%; padding: 8px;" />
-    <button id="load-btn" style="padding: 8px 15px; cursor: pointer;">Otwórz</button>
+<div class="container">
+
+  <!-- NAGŁÓWEK -->
+  <div class="header-top">
+    <h1>Śpiewnik Psie Pole</h1>
+    <div class="header-controls">
+      <button class="btn btn-secondary btn-small" onclick="window.toggleAdminMode()" id="role-btn">🔑 Zaloguj</button>
+      <button class="btn btn-secondary btn-small" onclick="window.toggleTheme()" id="theme-btn">🌙</button>
+    </div>
   </div>
 
-  <iframe id="pdf-frame" class="pdf-viewer"></iframe>
+  <!-- EKRAN GŁÓWNY -->
+  <div id="view-home">
+    <div class="banner-container">
+      <img src="IMG_20260906_111651.jpg" alt="Baner Śpiewnik">
+    </div>
 
-  <script>
-    const loadBtn = document.getElementById('load-btn');
-    const pdfUrlInput = document.getElementById('pdf-url');
-    const pdfFrame = document.getElementById('pdf-frame');
+    <!-- SEKCJA BIEŻĄCYCH OGŁOSZEŃ -->
+    <div class="announcement-box" id="announcement-card">
+      <div class="announcement-header">
+        <span class="announcement-title">📢 Ogłoszenia</span>
+        <button class="btn btn-secondary btn-small admin-only hidden" onclick="window.openAnnouncementForm()">✏️ Edytuj</button>
+      </div>
+      <div class="announcement-text" id="announcement-display-text">Brak aktualnych ogłoszeń.</div>
+    </div>
 
-    loadBtn.addEventListener('click', function() {
-      const pdfUrl = pdfUrlInput.value.trim();
-      
-      if (pdfUrl) {
-        // Owinięcie adresu URL pliku PDF w viewer Google Docs
-        pdfFrame.src = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
-        pdfFrame.style.display = 'block';
+    <button class="btn btn-filled" onclick="window.showView('view-songs')">📖 Przeglądaj Śpiewnik</button>
+    <button class="btn btn-filled" onclick="window.showView('view-repertuar')">📌 Bieżący Repertuar</button>
+    <button class="btn btn-filled" onclick="window.showView('view-archive')">📁 Archiwum Repertuarów</button>
+    
+    <div class="admin-only hidden">
+      <div style="margin: 20px 0 12px 0; border-top: 1px dashed var(--border);"></div>
+      <button class="btn btn-secondary" onclick="window.openAddForm()">➕ Dodaj Utwór</button>
+      <button class="btn btn-secondary" onclick="window.openBulkForm()">📥 Import Masowy</button>
+    </div>
+  </div>
+
+  <!-- WIDOK: EDYCYJNY OGŁOSZEŃ (ADMIN) -->
+  <div id="view-announcement-form" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">Anuluj</button>
+      <h2>Edycja Ogłoszeń</h2>
+      <div></div>
+    </div>
+    <textarea id="announcement-input" class="input-field" style="height: 200px;" placeholder="Wpisz treść ogłoszeń..."></textarea>
+    <button class="btn btn-filled" onclick="window.saveAnnouncement()">💾 Zapisz Ogłoszenie</button>
+  </div>
+
+  <!-- WIDOK: ŚPIEWNIK -->
+  <div id="view-songs" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
+      <h2>Śpiewnik</h2>
+      <div></div>
+    </div>
+    <input type="text" id="search-input" class="input-field" placeholder="🔎 Szukaj pieśni..." onkeyup="window.filterSongs()">
+    <div class="cat-bar" id="categories-bar"></div>
+    <div id="all-songs-list"></div>
+  </div>
+
+  <!-- WIDOK: REPERTUAR -->
+  <div id="view-repertuar" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
+      <h2>Bieżący Repertuar</h2>
+      <div></div>
+    </div>
+    
+    <div class="admin-only hidden" style="margin-bottom: 15px;">
+      <input type="text" id="archive-name-input" class="input-field" placeholder="Nazwa zestawu (np. Niedziela 15.10)">
+      <button class="btn btn-filled btn-small" style="width: 100%;" onclick="window.saveRepertuarToArchive()">💾 Zapisz do Archiwum w Chmurze</button>
+    </div>
+
+    <div id="repertuar-list"></div>
+  </div>
+
+  <!-- WIDOK: ARCHIWUM -->
+  <div id="view-archive" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">⬅️ Powrót</button>
+      <h2>Archiwum</h2>
+      <div></div>
+    </div>
+    <div id="archive-list"></div>
+  </div>
+
+  <!-- WIDOK: PODGLĄD ARCHIWUM -->
+  <div id="view-archive-detail" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-archive')">⬅️ Powrót</button>
+      <h2 id="archive-detail-title">Podgląd Archiwum</h2>
+      <div></div>
+    </div>
+
+    <div class="admin-only hidden" style="margin-bottom: 16px;">
+      <button class="btn btn-filled" onclick="window.applyArchiveAsCurrent()">📌 Ustaw ten zestaw jako Bieżący Repertuar</button>
+    </div>
+
+    <div id="archive-detail-list"></div>
+  </div>
+
+  <!-- WIDOK: POJEDYNCZA PIEŚŃ -->
+  <div id="view-single" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.goBackFromSong()">⬅️ Powrót</button>
+      <span id="view-category" class="song-category"></span>
+      <button class="btn btn-secondary btn-small admin-only hidden" onclick="window.editCurrentSong()">✏️ Edytuj</button>
+    </div>
+
+    <h2 id="view-title" style="margin-top: 10px; font-family: 'Playfair Display', Georgia, serif; color: var(--primary);"></h2>
+    
+    <div id="view-audio-container" class="hidden" style="margin-top: 10px;">
+      <audio id="view-audio-player" controls preload="metadata"></audio>
+    </div>
+
+    <div class="controls-panel">
+      <button class="btn btn-secondary btn-small" id="btn-toggle-pdf" onclick="window.togglePdf()">🎼 Nuty PDF</button>
+      <button class="btn btn-secondary btn-small" onclick="window.toggleChords()">🎸 Akordy</button>
+      <button class="btn btn-secondary btn-small" onclick="window.transpose(1)">Ton +1</button>
+      <button class="btn btn-secondary btn-small" onclick="window.transpose(-1)">Ton -1</button>
+      <button class="btn btn-secondary btn-small" id="btn-reset-trans" onclick="window.resetTranspose()">🔄 Orig</button>
+      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(2)">A+</button>
+      <button class="btn btn-secondary btn-small" onclick="window.changeFontSize(-2)">A-</button>
+      <button class="btn btn-secondary btn-small" id="btn-scroll" onclick="window.toggleAutoScroll()">📜 Scroll</button>
+    </div>
+
+    <!-- ELASYCZNY KONTENER NA PDF / IFRAME -->
+    <div id="view-pdf-container" class="pdf-viewer-container hidden">
+      <div id="pdf-canvas-wrapper-box" style="width: 100%;">
+        <div class="pdf-controls" id="pdf-controls-box">
+          <button class="btn btn-secondary btn-small" onclick="window.changePdfPage(-1)">◀ Poprzednia</button>
+          <span id="pdf-page-info" style="font-size: 0.85rem; font-weight:600;">Strona 1/1</span>
+          <button class="btn btn-secondary btn-small" onclick="window.changePdfPage(1)">Następna ▶</button>
+          <button class="btn btn-secondary btn-small" onclick="window.zoomPdf(0.2)">🔍 +</button>
+          <button class="btn btn-secondary btn-small" onclick="window.zoomPdf(-0.2)">🔍 -</button>
+        </div>
+        <div class="pdf-canvas-wrapper">
+          <canvas id="pdf-render-canvas"></canvas>
+        </div>
+      </div>
+      <div id="pdf-iframe-wrapper-box" class="pdf-iframe-wrapper hidden">
+        <iframe id="pdf-frame" src="" allow="autoplay"></iframe>
+      </div>
+    </div>
+
+    <div id="view-chords" class="song-chords"></div>
+    <div id="view-lyrics" class="song-lyrics"></div>
+  </div>
+
+  <!-- WIDOK: FORMULARZ DODAWANIA / EDYCJI UTWORU -->
+  <div id="view-form" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-songs')">Anuluj</button>
+      <h2 id="form-header">Dodaj Utwór</h2>
+      <div></div>
+    </div>
+
+    <input type="hidden" id="form-id">
+    <input type="text" id="form-title" class="input-field" placeholder="Tytuł utworu">
+    <input type="text" id="form-category" class="input-field" placeholder="Kategoria (np. Uwielbienie, Kolędy)">
+    
+    <label class="checkbox-container">
+      <input type="checkbox" id="form-has-actions">
+      <span>Z pokazywaniem 🙌</span>
+    </label>
+
+    <input type="text" id="form-audio-url" class="input-field" placeholder="Link do nagrania audio (MP3 / WAV / Firebase Storage)">
+    <input type="text" id="form-pdf-url" class="input-field" placeholder="Link do nut w pliku PDF (Google Drive / URL)">
+    <textarea id="form-lyrics" class="input-field" placeholder="Tekst pieśni..."></textarea>
+    <textarea id="form-chords" class="input-field" placeholder="Akordy (opcjonalnie)..."></textarea>
+
+    <button class="btn btn-filled" onclick="window.saveSong()">💾 Zapisz w chmurze</button>
+    <button id="btn-delete" class="btn btn-danger hidden" onclick="window.deleteCurrentSong()">🗑️ Usuń utwór</button>
+  </div>
+
+  <!-- WIDOK: MASOWE DODAWANIE -->
+  <div id="view-bulk" class="hidden">
+    <div class="nav-bar">
+      <button class="btn btn-secondary btn-small" onclick="window.showView('view-home')">Anuluj</button>
+      <h2>Import Masowy</h2>
+      <div></div>
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px; line-height: 1.5;">
+      Format:<br>
+      "Tytuł Pieśni" [Kategoria]<br>
+      # Pokazywanie: tak<br>
+      # Tekst<br>Linia tekstu...<br>
+      # Akordy<br>Linia akordów...<br>
+      URL: https://... (audio)<br>
+      PDF: https://... (nuty)
+    </p>
+    <textarea id="form-bulk-text" class="input-field" placeholder='Wklej dane tutaj...'></textarea>
+    <button class="btn btn-filled" onclick="window.processBulkImport()">🚀 Zaimportuj wszystkie do chmury</button>
+  </div>
+
+</div>
+
+<!-- LOGIKA APLIKACJI I FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+    });
+  }
+
+  // Ustawienie PDF.js Worker
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  // KONFIGURACJA BAZY FIREBASE CHÓR PSIE POLE
+  const firebaseConfig = {
+    apiKey: "AIzaSyCa7IeaO36b7XBJA723CC4zJAjI6BgP5wQ",
+    authDomain: "chor-psie-pole.firebaseapp.com",
+    projectId: "chor-psie-pole",
+    storageBucket: "chor-psie-pole.firebasestorage.app",
+    messagingSenderId: "493515214319",
+    appId: "1:493515214319:web:64cd86073792c1ce313a1a",
+    measurementId: "G-D4S4YC3DGG"
+  };
+
+  let db = null;
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  } catch (e) {
+    console.error("Błąd połączenia z Firebase:", e);
+  }
+
+  let songs = [];
+  let archives = [];
+  let repertuarIds = [];
+  let repertuarRoles = {}; 
+  let currentAnnouncement = "Brak aktualnych ogłoszeń.";
+  let selectedArchive = null;
+
+  let isAdmin = false;
+  let activeCategory = 'Wszystkie';
+  let currentSongId = null;
+  let previousView = 'view-home';
+  let scrollInterval = null;
+  let isScrolling = false;
+  let currentTransposeSteps = 0;
+  let originalChords = "";
+
+  // PDF variables
+  let currentPdfDoc = null;
+  let pdfPageNum = 1;
+  let pdfScale = 1.0;
+
+  const ADMIN_PIN = "0410";
+  const LITURGICAL_ROLES = ["Wejście", "Ofiarowanie", "Komunia", "Uwielbienie", "Zakończenie"];
+
+  const scaleMajor = ["C", "Cis", "D", "Dis", "E", "F", "Fis", "G", "Gis", "A", "B", "H"];
+  const scaleMinor = ["c", "cis", "d", "dis", "e", "f", "fis", "g", "gis", "a", "b", "h"];
+
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('install')) {
+      showInstallBanner();
+    }
+  });
+
+  function showInstallBanner() {
+    const banner = document.createElement('div');
+    banner.id = 'pwa-install-banner';
+    banner.innerHTML = `
+      <div style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 2px solid var(--accent-gold); padding: 20px; box-shadow: 0 -5px 25px rgba(0,0,0,0.15); text-align: center; z-index: 9999;">
+        <h3 style="font-family: 'Playfair Display', serif; color: var(--primary); margin-bottom: 8px;">Zainstaluj aplikację Śpiewnika</h3>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px;">Miej śpiewnik zawsze pod ręką, także offline.</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button id="pwa-install-btn" class="btn btn-filled" style="width: auto; padding: 10px 20px;">📲 Zainstaluj teraz</button>
+          <button onclick="document.getElementById('pwa-install-banner').remove()" class="btn btn-secondary" style="width: auto; padding: 10px 15px;">Później</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(banner);
+
+    document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        banner.remove();
       } else {
-        alert('Wprowadź prawidłowy URL do pliku PDF.');
+        alert("Aby zainstalować aplikację na iOS (Safari), kliknij przycisk 'Udostępnij' i wybierz 'Do ekranu początkowego'.");
       }
     });
-  </script>
+  }
+
+  const savedTheme = localStorage.getItem('spiewnik_theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const themeBtn = document.getElementById('theme-btn');
+    if (themeBtn) themeBtn.innerText = "☀️";
+  }
+
+  window.toggleTheme = function() {
+    const current = document.documentElement.getAttribute('data-theme');
+    if (current === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('spiewnik_theme', 'light');
+      document.getElementById('theme-btn').innerText = "🌙";
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('spiewnik_theme', 'dark');
+      document.getElementById('theme-btn').innerText = "☀️";
+    }
+  };
+
+  window.toggleAdminMode = function() {
+    if (isAdmin) {
+      isAdmin = false;
+      updateRoleUI();
+    } else {
+      const pin = prompt("Wprowadź kod PIN Admina:");
+      if (pin === ADMIN_PIN) {
+        isAdmin = true;
+        updateRoleUI();
+      } else if (pin !== null) {
+        alert("Błędny kod PIN!");
+      }
+    }
+  };
+
+  function updateRoleUI() {
+    const roleBtn = document.getElementById('role-btn');
+    const adminElements = document.querySelectorAll('.admin-only');
+
+    if (isAdmin) {
+      roleBtn.innerText = "🔒 Wyjdź";
+      roleBtn.style.borderColor = "var(--accent-red)";
+      adminElements.forEach(el => el.classList.remove('hidden'));
+    } else {
+      roleBtn.innerText = "🔑 Zaloguj";
+      roleBtn.style.borderColor = "var(--border)";
+      adminElements.forEach(el => el.classList.add('hidden'));
+    }
+    renderAll();
+  }
+
+  function initFirebaseSync() {
+    if (!db) return;
+
+    onSnapshot(collection(db, "songs"), (snapshot) => {
+      const fetched = [];
+      snapshot.forEach((docSnap) => {
+        fetched.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      songs = fetched;
+      renderAll();
+    });
+
+    onSnapshot(doc(db, "repertuar", "current"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        repertuarIds = data.songIds || [];
+        repertuarRoles = data.roles || {};
+      } else {
+        repertuarIds = [];
+        repertuarRoles = {};
+      }
+      renderRepertuar();
+      renderSongsList();
+    });
+
+    onSnapshot(collection(db, "archives"), (snapshot) => {
+      const fetchedArch = [];
+      snapshot.forEach((docSnap) => {
+        fetchedArch.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      archives = fetchedArch;
+      renderArchives();
+    });
+
+    onSnapshot(doc(db, "announcements", "main"), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().text) {
+        currentAnnouncement = docSnap.data().text;
+      } else {
+        currentAnnouncement = "Brak aktualnych ogłoszeń.";
+      }
+      document.getElementById('announcement-display-text').innerText = currentAnnouncement;
+    });
+  }
+
+  window.openAnnouncementForm = function() {
+    if (!isAdmin) return;
+    document.getElementById('announcement-input').value = currentAnnouncement === "Brak aktualnych ogłoszeń." ? "" : currentAnnouncement;
+    window.showView('view-announcement-form');
+  };
+
+  window.saveAnnouncement = async function() {
+    if (!isAdmin) return;
+    const text = document.getElementById('announcement-input').value.trim();
+    const textToSave = text !== "" ? text : "Brak aktualnych ogłoszeń.";
+
+    if (db) {
+      try {
+        await setDoc(doc(db, "announcements", "main"), { text: textToSave, updatedAt: new Date() });
+        window.showView('view-home');
+      } catch (e) {
+        console.error("Błąd zapisu ogłoszenia:", e);
+        alert("Wystąpił błąd podczas zapisu ogłoszenia.");
+      }
+    }
+  };
+
+  window.showView = function(viewId) {
+    stopAutoScroll();
+    document.querySelectorAll('.container > div:not(.header-top)').forEach(div => div.classList.add('hidden'));
+    const target = document.getElementById(viewId);
+    if (target) target.classList.remove('hidden');
+  };
+
+  function renderAll() {
+    renderCategoryChips();
+    renderSongsList();
+    renderRepertuar();
+    renderArchives();
+  }
+
+  function getUniqueCategories() {
+    const cats = new Set();
+    songs.forEach(s => { if (s.category) cats.add(s.category.trim()); });
+    return Array.from(cats).sort((a, b) => a.localeCompare(b, 'pl'));
+  }
+
+  function renderCategoryChips() {
+    const container = document.getElementById('categories-bar');
+    if(!container) return;
+    container.innerHTML = '';
+    const categories = ['Wszystkie', ...getUniqueCategories()];
+
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = `cat-chip ${activeCategory === cat ? 'active' : ''}`;
+      btn.innerText = cat;
+      btn.onclick = () => {
+        activeCategory = cat;
+        renderCategoryChips();
+        renderSongsList();
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  function renderSongsList() {
+    const container = document.getElementById('all-songs-list');
+    if(!container) return;
+    container.innerHTML = '';
+
+    let sortedSongs = [...songs].sort((a, b) => (a.title || '').localeCompare(b.title || '', 'pl'));
+
+    if (activeCategory !== 'Wszystkie') {
+      sortedSongs = sortedSongs.filter(s => (s.category || '') === activeCategory);
+    }
+
+    if (sortedSongs.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">Brak utworów w tej kategorii.</p>';
+      return;
+    }
+
+    sortedSongs.forEach(song => container.appendChild(createSongRow(song, false)));
+  }
+
+  function renderRepertuar() {
+    const container = document.getElementById('repertuar-list');
+    if(!container) return;
+    container.innerHTML = '';
+    let list = songs.filter(s => repertuarIds.includes(s.id));
+
+    if (list.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">Repertuar jest obecnie pusty.</p>';
+      return;
+    }
+
+    list.sort((a, b) => {
+      const roleA = repertuarRoles[a.id] || '';
+      const roleB = repertuarRoles[b.id] || '';
+
+      const indexA = LITURGICAL_ROLES.indexOf(roleA);
+      const indexB = LITURGICAL_ROLES.indexOf(roleB);
+
+      const orderA = indexA !== -1 ? indexA : 99;
+      const orderB = indexB !== -1 ? indexB : 99;
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      return (a.title || '').localeCompare(b.title || '', 'pl');
+    });
+
+    list.forEach(song => container.appendChild(createSongRow(song, true)));
+  }
+
+  function renderArchives() {
+    const container = document.getElementById('archive-list');
+    if(!container) return;
+    container.innerHTML = '';
+
+    if (archives.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">Brak zapisanych archiwów.</p>';
+      return;
+    }
+
+    archives.forEach(arch => {
+      const div = document.createElement('div');
+      div.className = 'archive-item';
+      const deleteBtn = isAdmin ? `<button class="btn btn-danger btn-small" onclick="window.deleteArchive('${arch.id}')">🗑️</button>` : '';
+      
+      div.innerHTML = `
+        <div>
+          <strong style="font-family: 'Playfair Display', serif;">${arch.name}</strong>
+          <div style="font-size:0.78rem; color:var(--text-sub); margin-top:2px;">Pieśni: ${(arch.songIds || []).length}</div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-secondary btn-small" onclick="window.viewArchiveDetail('${arch.id}')">📂 Otwórz</button>
+          ${deleteBtn}
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function createSongRow(song, isRepertuarView = false, customRoles = null) {
+    const div = document.createElement('div');
+    div.className = 'song-item';
+    const inRep = repertuarIds.includes(song.id);
+    const audioIcon = (song.audioUrl && song.audioUrl.trim() !== '') ? ' 🎵' : '';
+    const pdfIcon = (song.pdfUrl && song.pdfUrl.trim() !== '') ? ' 🎼' : '';
+    const actionsIcon = song.hasActions ? ' 🙌' : '';
+    
+    const rolesSource = customRoles || repertuarRoles;
+    const role = rolesSource[song.id] || '';
+    const roleBadge = (isRepertuarView && role) ? `<span class="role-badge">${role}</span>` : '';
+
+    let adminControls = '';
+    if (isAdmin && isRepertuarView && !customRoles) {
+      const optionsHTML = ['<option value="">-- Rola --</option>', ...LITURGICAL_ROLES.map(r => 
+        `<option value="${r}" ${role === r ? 'selected' : ''}>${r}</option>`
+      )].join('');
+
+      adminControls = `
+        <div style="display: flex; gap: 6px; align-items: center; margin-top: 6px; width: 100%; justify-content: flex-end;">
+          <select class="select-field" onchange="window.setSongRole('${song.id}', this.value)">
+            ${optionsHTML}
+          </select>
+          <button class="btn btn-secondary btn-small" onclick="window.toggleRepertuar('${song.id}')">➖ Usunąć</button>
+        </div>
+      `;
+    } else if (isAdmin && !isRepertuarView && !customRoles) {
+      adminControls = `
+        <button class="btn btn-secondary btn-small" onclick="window.toggleRepertuar('${song.id}')">
+          ${inRep ? '➖' : '➕'}
+        </button>
+      `;
+    }
+
+    div.innerHTML = `
+      <button class="song-title-btn" onclick="window.openSong('${song.id}')">
+        ${song.title}${actionsIcon}${audioIcon}${pdfIcon}${roleBadge} <span class="song-category">${song.category || 'Uwielbienie'}</span>
+      </button>
+      ${adminControls}
+    `;
+    return div;
+  }
+
+  window.setSongRole = async function(songId, newRole) {
+    if (!isAdmin) return;
+    if (newRole) {
+      repertuarRoles[songId] = newRole;
+    } else {
+      delete repertuarRoles[songId];
+    }
+
+    if (db) {
+      try {
+        await setDoc(doc(db, "repertuar", "current"), { 
+          songIds: repertuarIds,
+          roles: repertuarRoles 
+        });
+      } catch (e) {
+        console.error("Błąd zapisu roli liturgicznej:", e);
+      }
+    }
+    renderRepertuar();
+  };
+
+  window.openSong = function(id) {
+    const song = songs.find(s => s.id === id);
+    if (!song) return;
+
+    currentSongId = id;
+    currentTransposeSteps = 0;
+    originalChords = song.chords || '';
+
+    if (!document.getElementById('view-songs').classList.contains('hidden')) previousView = 'view-songs';
+    else if (!document.getElementById('view-repertuar').classList.contains('hidden')) previousView = 'view-repertuar';
+    else if (!document.getElementById('view-archive-detail').classList.contains('hidden')) previousView = 'view-archive-detail';
+    else previousView = 'view-home';
+
+    const titleWithActions = song.title + (song.hasActions ? ' 🙌' : '');
+    document.getElementById('view-title').innerText = titleWithActions;
+    document.getElementById('view-category').innerText = song.category || 'Uwielbienie';
+    document.getElementById('view-lyrics').innerText = song.lyrics || '';
+    
+    renderChordsView();
+
+    const audioContainer = document.getElementById('view-audio-container');
+    const audioPlayer = document.getElementById('view-audio-player');
+    
+    if (song.audioUrl && song.audioUrl.trim() !== '') {
+      audioPlayer.src = song.audioUrl.trim();
+      audioContainer.classList.remove('hidden');
+    } else {
+      audioPlayer.pause();
+      audioPlayer.src = "";
+      audioContainer.classList.add('hidden');
+    }
+
+    const pdfBtn = document.getElementById('btn-toggle-pdf');
+    const pdfContainer = document.getElementById('view-pdf-container');
+    pdfContainer.classList.add('hidden');
+    currentPdfDoc = null;
+
+    if (song.pdfUrl && song.pdfUrl.trim() !== '') {
+      pdfBtn.classList.remove('hidden');
+      loadPdf(song.pdfUrl.trim());
+    } else {
+      pdfBtn.classList.add('hidden');
+    }
+
+    window.showView('view-single');
+  };
+
+  async function loadPdf(url) {
+    const canvasBox = document.getElementById('pdf-canvas-wrapper-box');
+    const iframeBox = document.getElementById('pdf-iframe-wrapper-box');
+    const iframe = document.getElementById('pdf-frame');
+
+    // Obsługa linków z Google Drive oraz zewnętrznych podglądów iframe
+    if (url.includes('drive.google.com') || url.includes('/preview') || !url.toLowerCase().endsWith('.pdf')) {
+      let previewUrl = url;
+      if (url.includes('drive.google.com/file/d/')) {
+        previewUrl = url.replace(/\/view.*$/, '/preview');
+      } else if (url.includes('drive.google.com/uc?')) {
+        const idMatch = url.match(/id=([^&]+)/);
+        if (idMatch) {
+          previewUrl = `https://drive.google.com/file/d/${idMatch[1]}/preview`;
+        }
+      }
+
+      iframe.src = previewUrl;
+      canvasBox.classList.add('hidden');
+      iframeBox.classList.remove('hidden');
+    } else {
+      // Wykorzystanie renderera canvas PDF.js dla bezpośrednich plików .pdf
+      iframe.src = '';
+      iframeBox.classList.add('hidden');
+      canvasBox.classList.remove('hidden');
+
+      try {
+        const loadingTask = pdfjsLib.getDocument(url);
+        currentPdfDoc = await loadingTask.promise;
+        pdfPageNum = 1;
+        pdfScale = 1.0;
+        renderPdfPage(pdfPageNum);
+      } catch (e) {
+        console.error("Błąd wczytywania PDF.js, używam fallback Iframe:", e);
+        iframe.src = url;
+        canvasBox.classList.add('hidden');
+        iframeBox.classList.remove('hidden');
+      }
+    }
+  }
+
+  async function renderPdfPage(num) {
+    if (!currentPdfDoc) return;
+    const page = await currentPdfDoc.getPage(num);
+    const viewport = page.getViewport({ scale: pdfScale });
+
+    const canvas = document.getElementById('pdf-render-canvas');
+    const context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport
+    };
+
+    await page.render(renderContext).promise;
+    document.getElementById('pdf-page-info').innerText = `Strona ${num}/${currentPdfDoc.numPages}`;
+  }
+
+  window.togglePdf = function() {
+    const pdfContainer = document.getElementById('view-pdf-container');
+    pdfContainer.classList.toggle('hidden');
+  };
+
+  window.changePdfPage = function(delta) {
+    if (!currentPdfDoc) return;
+    if (pdfPageNum + delta >= 1 && pdfPageNum + delta <= currentPdfDoc.numPages) {
+      pdfPageNum += delta;
+      renderPdfPage(pdfPageNum);
+    }
+  };
+
+  window.zoomPdf = function(delta) {
+    if (!currentPdfDoc) return;
+    pdfScale = Math.max(0.5, Math.min(3.0, pdfScale + delta));
+    renderPdfPage(pdfPageNum);
+  };
+
+  function renderChordsView() {
+    const chordsEl = document.getElementById('view-chords');
+    if (!originalChords || originalChords.trim() === '') {
+      chordsEl.innerHTML = 'Brak akordów.';
+      return;
+    }
+
+    const transposed = transposeChordsPL(originalChords, currentTransposeSteps);
+    let capoBadge = "";
+    
+    if (currentTransposeSteps !== 0) {
+      const capoFret = (12 - currentTransposeSteps) % 12;
+      capoBadge = `<div class="capo-badge">🎸 Capo ${capoFret}</div><br>`;
+    }
+
+    chordsEl.innerHTML = capoBadge + transposed;
+  }
+
+  function transposeChordsPL(chordsText, steps) {
+    if (steps === 0) return chordsText;
+
+    return chordsText.replace(/\b([A-Ga-g][is]*|[BHbh])(maj7|7|sus4|add9|dim)?\b/g, (match, root, suffix) => {
+      let idxMajor = scaleMajor.indexOf(root);
+      if (idxMajor !== -1) {
+        let newIdx = (idxMajor + steps) % 12;
+        if (newIdx < 0) newIdx += 12;
+        return scaleMajor[newIdx] + (suffix || '');
+      }
+
+      let idxMinor = scaleMinor.indexOf(root);
+      if (idxMinor !== -1) {
+        let newIdx = (idxMinor + steps) % 12;
+        if (newIdx < 0) newIdx += 12;
+        return scaleMinor[newIdx] + (suffix || '');
+      }
+
+      return match;
+    });
+  }
+
+  window.goBackFromSong = function() {
+    const audioPlayer = document.getElementById('view-audio-player');
+    if (audioPlayer) audioPlayer.pause();
+    window.showView(previousView);
+  };
+
+  window.toggleChords = function() {
+    const el = document.getElementById('view-chords');
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  };
+
+  window.changeFontSize = function(delta) {
+    const el = document.getElementById('view-lyrics');
+    const size = parseFloat(window.getComputedStyle(el).fontSize);
+    el.style.fontSize = (size + delta) + 'px';
+  };
+
+  window.transpose = function(steps) {
+    if (!originalChords) return;
+    currentTransposeSteps = (currentTransposeSteps + steps) % 12;
+    if (currentTransposeSteps < 0) currentTransposeSteps += 12;
+    renderChordsView();
+  };
+
+  window.resetTranspose = function() {
+    currentTransposeSteps = 0;
+    renderChordsView();
+  };
+
+  window.toggleAutoScroll = function() {
+    if (isScrolling) stopAutoScroll();
+    else startAutoScroll();
+  };
+
+  function startAutoScroll() {
+    isScrolling = true;
+    document.getElementById('btn-scroll').innerText = "⏸️ Stop";
+    scrollInterval = setInterval(() => {
+      window.scrollBy(0, 1);
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) stopAutoScroll();
+    }, 40);
+  }
+
+  function stopAutoScroll() {
+    isScrolling = false;
+    clearInterval(scrollInterval);
+    const btn = document.getElementById('btn-scroll');
+    if (btn) btn.innerText = "📜 Scroll";
+  }
+
+  window.toggleRepertuar = async function(id) {
+    if (!isAdmin) return;
+    if (repertuarIds.includes(id)) {
+      repertuarIds = repertuarIds.filter(i => i !== id);
+      delete repertuarRoles[id];
+    } else {
+      repertuarIds.push(id);
+    }
+    
+    if (db) {
+      try {
+        await setDoc(doc(db, "repertuar", "current"), { 
+          songIds: repertuarIds,
+          roles: repertuarRoles
+        });
+      } catch (e) {
+        console.error("Błąd zapisu repertuaru:", e);
+      }
+    }
+    renderAll();
+  };
+
+  window.saveRepertuarToArchive = async function() {
+    if (!isAdmin) return;
+    const input = document.getElementById('archive-name-input');
+    const name = input.value.trim();
+    if (!name || repertuarIds.length === 0) return alert("Wpisz nazwę zestawu i upewnij się, że repertuar nie jest pusty!");
+
+    if (db) {
+      try {
+        await addDoc(collection(db, "archives"), { 
+          name, 
+          songIds: [...repertuarIds], 
+          roles: { ...repertuarRoles },
+          createdAt: new Date() 
+        });
+        input.value = '';
+        alert("Zapisano zestaw w chmurze!");
+      } catch (e) {
+        console.error("Błąd zapisu archiwum:", e);
+      }
+    }
+  };
+
+  window.viewArchiveDetail = function(id) {
+    const arch = archives.find(a => a.id === id);
+    if (!arch) return;
+
+    selectedArchive = arch;
+    document.getElementById('archive-detail-title').innerText = arch.name;
+
+    const container = document.getElementById('archive-detail-list');
+    container.innerHTML = '';
+
+    const archIds = Array.isArray(arch.songIds) ? arch.songIds : [];
+    const archRoles = arch.roles || {};
+
+    let list = songs.filter(s => archIds.includes(s.id));
+
+    if (list.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-sub); font-size: 0.9rem;">To archiwum jest puste lub pieśni zostały usunięte.</p>';
+    } else {
+      list.sort((a, b) => {
+        const roleA = archRoles[a.id] || '';
+        const roleB = archRoles[b.id] || '';
+
+        const indexA = LITURGICAL_ROLES.indexOf(roleA);
+        const indexB = LITURGICAL_ROLES.indexOf(roleB);
+
+        const orderA = indexA !== -1 ? indexA : 99;
+        const orderB = indexB !== -1 ? indexB : 99;
+
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.title || '').localeCompare(b.title || '', 'pl');
+      });
+
+      list.forEach(song => {
+        container.appendChild(createSongRow(song, true, archRoles));
+      });
+    }
+
+    window.showView('view-archive-detail');
+  };
+
+  window.applyArchiveAsCurrent = async function() {
+    if (!isAdmin || !selectedArchive) return;
+    if (!confirm(`Czy na pewno chcesz ustawić "${selectedArchive.name}" jako bieżący repertuar?`)) return;
+
+    repertuarIds = Array.isArray(selectedArchive.songIds) ? [...selectedArchive.songIds] : [];
+    repertuarRoles = selectedArchive.roles ? { ...selectedArchive.roles } : {};
+
+    if (db) {
+      try {
+        await setDoc(doc(db, "repertuar", "current"), { 
+          songIds: repertuarIds,
+          roles: repertuarRoles
+        });
+        alert("Pomyślnie zmieniono bieżący repertuar!");
+      } catch (e) {
+        console.error("Błąd ładowania archiwum do chmury:", e);
+      }
+    }
+
+    renderAll();
+    window.showView('view-repertuar');
+  };
+
+  window.deleteArchive = async function(id) {
+    if (!isAdmin) return;
+    if (!confirm("Usunąć to archiwum z chmury?")) return;
+    if (db) {
+      try {
+        await deleteDoc(doc(db, "archives", id));
+      } catch (e) {
+        console.error("Błąd usuwania archiwum:", e);
+      }
+    }
+  };
+
+  window.filterSongs = function() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    document.querySelectorAll('#all-songs-list .song-item').forEach(row => {
+      row.style.display = row.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+    });
+  };
+
+  window.openAddForm = function() {
+    if (!isAdmin) return;
+    document.getElementById('form-header').innerText = "Dodaj Utwór";
+    document.getElementById('form-id').value = "";
+    document.getElementById('form-title').value = "";
+    document.getElementById('form-category').value = "";
+    document.getElementById('form-has-actions').checked = false;
+    document.getElementById('form-audio-url').value = "";
+    document.getElementById('form-pdf-url').value = "";
+    document.getElementById('form-lyrics').value = "";
+    document.getElementById('form-chords').value = "";
+    document.getElementById('btn-delete').classList.add('hidden');
+    window.showView('view-form');
+  };
+
+  window.editCurrentSong = function() {
+    if (!isAdmin) return;
+    const song = songs.find(s => s.id === currentSongId);
+    if (!song) return;
+
+    document.getElementById('form-header').innerText = "Edytuj Utwór";
+    document.getElementById('form-id').value = song.id;
+    document.getElementById('form-title').value = song.title;
+    document.getElementById('form-category').value = song.category || "";
+    document.getElementById('form-has-actions').checked = !!song.hasActions;
+    document.getElementById('form-audio-url').value = song.audioUrl || "";
+    document.getElementById('form-pdf-url').value = song.pdfUrl || "";
+    document.getElementById('form-lyrics').value = song.lyrics || "";
+    document.getElementById('form-chords').value = song.chords || "";
+    document.getElementById('btn-delete').classList.remove('hidden');
+    window.showView('view-form');
+  };
+
+  window.saveSong = async function() {
+    if (!isAdmin) return;
+    const id = document.getElementById('form-id').value;
+    const title = document.getElementById('form-title').value.trim();
+    const category = document.getElementById('form-category').value.trim() || "Uwielbienie";
+    const hasActions = document.getElementById('form-has-actions').checked;
+    const audioUrl = document.getElementById('form-audio-url').value.trim();
+    const pdfUrl = document.getElementById('form-pdf-url').value.trim();
+    const lyrics = document.getElementById('form-lyrics').value.trim();
+    const chords = document.getElementById('form-chords').value.trim();
+
+    if (!title || !lyrics) return alert("Wypełnij tytuł oraz tekst utworu!");
+
+    const songData = { title, category, hasActions, audioUrl, pdfUrl, lyrics, chords };
+
+    try {
+      if (id) {
+        if (db) await updateDoc(doc(db, "songs", id), songData);
+      } else {
+        if (db) await addDoc(collection(db, "songs"), songData);
+      }
+      window.showView('view-songs');
+    } catch (e) {
+      console.error("Błąd zapisu do chmury:", e);
+      alert("Błąd zapisu w chmurze!");
+    }
+  };
+
+  window.deleteCurrentSong = async function() {
+    if (!isAdmin) return;
+    if (!confirm("Na pewno usunąć ten utwór z chmury?")) return;
+    const id = document.getElementById('form-id').value;
+    
+    try {
+      if (db) await deleteDoc(doc(db, "songs", id));
+      window.showView('view-songs');
+    } catch (e) {
+      console.error("Błąd usuwania z chmury:", e);
+      alert("Nie udało się usunąć utworu z chmury.");
+    }
+  };
+
+  window.openBulkForm = function() {
+    if (!isAdmin) return;
+    document.getElementById('form-bulk-text').value = "";
+    window.showView('view-bulk');
+  };
+
+  window.processBulkImport = async function() {
+    if (!isAdmin) return;
+    const raw = document.getElementById('form-bulk-text').value;
+    if (!raw.trim()) return alert("Wklej dane do importu!");
+
+    const blocks = raw.split(/(?=^")/gm);
+    let count = 0;
+
+    for (let block of blocks) {
+      if (!block.trim()) continue;
+
+      const lines = block.trim().split('\n');
+      let firstLine = lines[0].trim();
+      
+      let title = "Bez tytułu";
+      let category = "Uwielbienie";
+      let hasActions = false;
+      
+      const titleMatch = firstLine.match(/"([^"]+)"/);
+      if (titleMatch) {
+        title = titleMatch[1];
+        let remainder = firstLine.replace(titleMatch[0], '').trim();
+        const catMatch = remainder.match(/\[(.*?)\]|\((.*?)\)/);
+        if (catMatch) category = (catMatch[1] || catMatch[2]).trim();
+      } else {
+        title = firstLine;
+      }
+
+      let lyricsArr = [];
+      let chordsArr = [];
+      let audioUrl = "";
+      let pdfUrl = "";
+      let currentMode = "lyrics";
+
+      for (let i = 1; i < lines.length; i++) {
+        let line = lines[i];
+        let lower = line.trim().toLowerCase();
+
+        if (lower.startsWith("# akordy")) {
+          currentMode = "chords";
+          continue;
+        } else if (lower.startsWith("# tekst")) {
+          currentMode = "lyrics";
+          continue;
+        } else if (lower.startsWith("# pokazywanie") || lower.startsWith("pokazywanie:")) {
+          if (lower.includes("tak") || lower.includes("true") || lower.includes("1")) {
+            hasActions = true;
+          }
+          continue;
+        } else if (lower.startsWith("url:")) {
+          audioUrl = line.replace(/^url:\s*/i, '').trim();
+          continue;
+        } else if (lower.startsWith("pdf:")) {
+          pdfUrl = line.replace(/^pdf:\s*/i, '').trim();
+          continue;
+        }
+
+        if (currentMode === "chords") chordsArr.push(line);
+        else lyricsArr.push(line);
+      }
+
+      const newSongData = {
+        title,
+        category,
+        hasActions,
+        audioUrl,
+        pdfUrl,
+        lyrics: lyricsArr.join('\n').trim(),
+        chords: chordsArr.join('\n').trim()
+      };
+
+      if (db) {
+        try {
+          await addDoc(collection(db, "songs"), newSongData);
+          count++;
+        } catch (e) {
+          console.error("Błąd importu:", e);
+        }
+      }
+    }
+
+    alert(`Zaimportowano ${count} utworów do chmury!`);
+    window.showView('view-songs');
+  };
+
+  initFirebaseSync();
+  updateRoleUI();
+</script>
 
 </body>
 </html>

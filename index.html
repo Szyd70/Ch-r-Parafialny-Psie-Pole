@@ -3,37 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aplikacja PDF</title>
+  <title>Podgląd PDF</title>
   <style>
     * { box-sizing: border-box; font-family: sans-serif; }
-    body { margin: 0; padding: 20px; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-    .upload-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; width: 100%; max-width: 600px; }
-    input[type="file"] { margin-top: 10px; }
+    body { margin: 0; padding: 15px; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    .upload-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; margin-bottom: 15px; width: 100%; max-width: 600px; }
     .pdf-viewer { width: 100%; max-width: 900px; height: 80vh; border: 1px solid #ccc; border-radius: 8px; background: #fff; display: none; }
   </style>
 </head>
 <body>
 
   <div class="upload-container">
-    <h2>Dodaj i otwórz plik PDF</h2>
-    <input type="file" id="pdf-file" accept="application/pdf" />
+    <h2>Otwórz PDF z adresu URL</h2>
+    <input type="text" id="pdf-url" placeholder="Wklej bezpośredni URL do pliku PDF" style="width: 80%; padding: 8px;" />
+    <button id="load-btn" style="padding: 8px 15px; cursor: pointer;">Otwórz</button>
   </div>
 
   <iframe id="pdf-frame" class="pdf-viewer"></iframe>
 
   <script>
-    const fileInput = document.getElementById('pdf-file');
+    const loadBtn = document.getElementById('load-btn');
+    const pdfUrlInput = document.getElementById('pdf-url');
     const pdfFrame = document.getElementById('pdf-frame');
 
-    fileInput.addEventListener('change', function(event) {
-      const file = event.target.files[0];
+    loadBtn.addEventListener('click', function() {
+      const pdfUrl = pdfUrlInput.value.trim();
       
-      if (file && file.type === 'application/pdf') {
-        const fileURL = URL.createObjectURL(file);
-        pdfFrame.src = fileURL;
+      if (pdfUrl) {
+        // Owinięcie adresu URL pliku PDF w viewer Google Docs
+        pdfFrame.src = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
         pdfFrame.style.display = 'block';
       } else {
-        alert('Wybierz poprawny plik w formacie PDF.');
+        alert('Wprowadź prawidłowy URL do pliku PDF.');
       }
     });
   </script>

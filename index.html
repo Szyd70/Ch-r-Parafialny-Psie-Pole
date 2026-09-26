@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liturgia na Dziś - Służba Muzyczna</title>
+    <title>Liturgia Słowa</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -15,12 +15,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 16px;
-            box-sizing: border-box;
         }
 
         .container {
@@ -37,7 +36,7 @@
 
         h1 {
             margin: 0 0 6px 0;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: var(--gold);
         }
 
@@ -49,17 +48,9 @@
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
-            padding: 16px 20px;
+            padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border-left: 4px solid var(--accent);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
         }
 
         .card-title {
@@ -67,29 +58,13 @@
             font-size: 1.1rem;
             color: var(--accent);
             text-transform: uppercase;
-        }
-
-        .sigla {
-            font-size: 0.85rem;
-            background: #2a2a2a;
-            padding: 4px 8px;
-            border-radius: 4px;
-            color: var(--gold);
+            margin-bottom: 8px;
         }
 
         .card-body {
             line-height: 1.6;
             font-size: 1rem;
             white-space: pre-wrap;
-        }
-
-        .psalm-refren {
-            font-weight: bold;
-            color: var(--gold);
-            margin-bottom: 8px;
-            padding: 8px;
-            background-color: rgba(255, 215, 0, 0.1);
-            border-radius: 4px;
         }
 
         .status {
@@ -117,47 +92,15 @@
 <div class="container">
     <header>
         <h1 id="swieto-title">Liturgia Słowa</h1>
-        <div class="date-badge" id="liturgia-date">Pobieranie danych...</div>
+        <div class="date-badge" id="liturgia-date">Ładowanie...</div>
     </header>
 
     <div id="status" class="status">Pobieranie czytań liturgicznych...</div>
 
     <div id="readings-container" style="display: none;">
-        <!-- I Czytanie -->
         <div class="card">
-            <div class="card-header">
-                <span class="card-title">Pierwsze Czytanie</span>
-                <span class="sigla" id="c1-sigla"></span>
-            </div>
-            <div class="card-body" id="c1-text"></div>
-        </div>
-
-        <!-- Psalm Responsoryjny -->
-        <div class="card" style="border-left-color: var(--gold);">
-            <div class="card-header">
-                <span class="card-title" style="color: var(--gold);">Psalm Responsoryjny</span>
-                <span class="sigla" id="psalm-sigla"></span>
-            </div>
-            <div class="psalm-refren" id="psalm-refren"></div>
-            <div class="card-body" id="psalm-text"></div>
-        </div>
-
-        <!-- II Czytanie -->
-        <div class="card" id="c2-card">
-            <div class="card-header">
-                <span class="card-title">Drugie Czytanie</span>
-                <span class="sigla" id="c2-sigla"></span>
-            </div>
-            <div class="card-body" id="c2-text"></div>
-        </div>
-
-        <!-- Ewangelia -->
-        <div class="card" style="border-left-color: #e91e63;">
-            <div class="card-header">
-                <span class="card-title" style="color: #e91e63;">Ewangelia</span>
-                <span class="sigla" id="ewangelia-sigla"></span>
-            </div>
-            <div class="card-body" id="ewangelia-text"></div>
+            <div class="card-title">Ewangelia / Czytanie Dnia</div>
+            <div class="card-body" id="main-reading"></div>
         </div>
     </div>
 
@@ -165,101 +108,69 @@
 </div>
 
 <script>
-    // Automatycznie ustaw na jutrzejszą niedzielę (2026-09-27)
     function getTomorrowDateString() {
         const d = new Date();
         d.setDate(d.getDate() + 1); // Jutro
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return `${year}${month}${day}`;
     }
 
     async function pobierzCzytania() {
-        const targetDate = getTomorrowDateString();
+        const dateStr = getTomorrowDateString();
         const statusEl = document.getElementById('status');
         const containerEl = document.getElementById('readings-container');
         
         statusEl.style.display = 'block';
-        statusEl.innerText = `Pobieranie czytań na jutro (${targetDate})...`;
+        statusEl.innerText = "Pobieranie danych...";
         containerEl.style.display = 'none';
 
-        // 1. Sprawdź pamięć podręczną (Offline Cache)
-        const cachedData = localStorage.getItem(`readings_${targetDate}`);
-        if (cachedData) {
-            renderData(JSON.parse(cachedData));
-            statusEl.style.display = 'none';
-            containerEl.style.display = 'block';
-            console.log("Załadowano czytania z pamięci podręcznej (Offline)");
+        // 1. Sprawdź pamięć podręczną (Cache)
+        const cached = localStorage.getItem(`readings_${dateStr}`);
+        if (cached) {
+            wyswietl(JSON.parse(cached));
+            return;
         }
 
-        // 2. Pobierz najnowsze dane z API Niedziela.pl / Katolik API
+        // 2. Pobierz z API Evangelizo (darmowe API wspierające język polski)
         try {
-            const response = await fetch(`https://niedziela.pl/api/liturgia/${targetDate}`);
+            const url = `https://aelf.evangelizo.org/api/v1/reading/pl/${dateStr}`;
+            const response = await fetch(url);
             
-            if (!response.ok) {
-                throw new Error("Błąd sieci podczas pobierania czytań.");
-            }
+            if (!response.ok) throw new Error("Błąd sieci");
 
             const data = await response.json();
             
-            // Zapisz w pamięci lokalnej pod tryb offline na chórze
-            localStorage.setItem(`readings_${targetDate}`, JSON.stringify(data));
-            
-            renderData(data);
-            statusEl.style.display = 'none';
-            containerEl.style.display = 'block';
-        } catch (error) {
-            console.warn("Nie udało się pobrać nowych danych z API. Próba użycia danych zapasowych:", error);
-            
-            if (!cachedData) {
-                // Zapytanie awaryjne przez darmowy CORS Proxy w razie obostrzeń przeglądarki
-                try {
-                    const fallbackResp = await fetch(`https://api.aladhan.com/v1/gregorian/${targetDate}`); // rezerwa
-                    statusEl.innerText = "Brak połączenia z siecią i brak zapisanych czytań offline.";
-                } catch(e) {
-                    statusEl.innerText = "Błąd wczytywania: Sprawdź połączenie z Internetem.";
-                }
+            if (data && data.data) {
+                localStorage.setItem(`readings_${dateStr}`, JSON.stringify(data.data));
+                wyswietl(data.data);
+            } else {
+                throw new Error("Brak danych");
             }
+        } catch (error) {
+            console.error(error);
+            statusEl.innerText = "Nie udało się pobrać czytań. Sprawdź połączenie lub CORS.";
         }
     }
 
-    function renderData(data) {
-        document.getElementById('liturgia-date').innerText = data.data_str || getTomorrowDateString();
-        if (data.swieto) {
-            document.getElementById('swieto-title').innerText = data.swieto;
-        }
-
-        // I Czytanie
-        if (data.czytanie1) {
-            document.getElementById('c1-sigla').innerText = data.czytanie1.sigla || '';
-            document.getElementById('c1-text').innerText = data.czytanie1.tekst || data.czytanie1;
-        }
-
-        // Psalm
-        if (data.psalm) {
-            document.getElementById('psalm-sigla').innerText = data.psalm.sigla || '';
-            document.getElementById('psalm-refren').innerText = data.psalm.refren ? `Refren: ${data.psalm.refren}` : '';
-            document.getElementById('psalm-text').innerText = data.psalm.tekst || data.psalm;
-        }
-
-        // II Czytanie (o ile występuje)
-        if (data.czytanie2 && (data.czytanie2.tekst || typeof data.czytanie2 === 'string')) {
-            document.getElementById('c2-card').style.display = 'block';
-            document.getElementById('c2-sigla').innerText = data.czytanie2.sigla || '';
-            document.getElementById('c2-text').innerText = data.czytanie2.tekst || data.czytanie2;
-        } else {
-            document.getElementById('c2-card').style.display = 'none';
-        }
-
-        // Ewangelia
-        if (data.ewangelia) {
-            document.getElementById('ewangelia-sigla').innerText = data.ewangelia.sigla || '';
-            document.getElementById('ewangelia-text').innerText = data.ewangelia.tekst || data.ewangelia;
+    function wyswietl(data) {
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('readings-container').style.display = 'block';
+        
+        const mainReading = document.getElementById('main-reading');
+        
+        if (Array.isArray(data)) {
+            mainReading.innerHTML = data.map(r => `
+                <h3 style="color: #ffd700; margin-top: 15px;">${r.title || r.type}</h3>
+                <p><b>${r.ref || ''}</b></p>
+                <div>${r.text || ''}</div>
+            `).join('<hr style="border-color: #333; margin: 20px 0;">');
+        } else if (data.text) {
+            mainReading.innerHTML = data.text;
         }
     }
 
-    // Uruchom przy starcie
     window.addEventListener('DOMContentLoaded', pobierzCzytania);
 </script>
 

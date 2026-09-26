@@ -40,11 +40,6 @@
             color: var(--gold);
         }
 
-        .date-badge {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
@@ -91,15 +86,14 @@
 
 <div class="container">
     <header>
-        <h1 id="swieto-title">Liturgia Słowa</h1>
-        <div class="date-badge" id="liturgia-date">Ładowanie...</div>
+        <h1>Liturgia Słowa na Jutro</h1>
     </header>
 
-    <div id="status" class="status">Pobieranie czytań liturgicznych...</div>
+    <div id="status" class="status">Ładowanie czytań...</div>
 
     <div id="readings-container" style="display: none;">
         <div class="card">
-            <div class="card-title">Ewangelia / Czytanie Dnia</div>
+            <div class="card-title">Treść Liturgii</div>
             <div class="card-body" id="main-reading"></div>
         </div>
     </div>
@@ -108,66 +102,30 @@
 </div>
 
 <script>
-    function getTomorrowDateString() {
-        const d = new Date();
-        d.setDate(d.getDate() + 1); // Jutro
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}${month}${day}`;
-    }
-
     async function pobierzCzytania() {
-        const dateStr = getTomorrowDateString();
         const statusEl = document.getElementById('status');
         const containerEl = document.getElementById('readings-container');
         
         statusEl.style.display = 'block';
-        statusEl.innerText = "Pobieranie danych...";
+        statusEl.innerText = "Pobieranie przez Vercel Serverless Function...";
         containerEl.style.display = 'none';
 
-        // 1. Sprawdź pamięć podręczną (Cache)
-        const cached = localStorage.getItem(`readings_${dateStr}`);
-        if (cached) {
-            wyswietl(JSON.parse(cached));
-            return;
-        }
-
-        // 2. Pobierz z API Evangelizo (darmowe API wspierające język polski)
         try {
-            const url = `https://aelf.evangelizo.org/api/v1/reading/pl/${dateStr}`;
-            const response = await fetch(url);
+            // Odwołujemy się do bezserwerowej funkcji w Vercel
+            const response = await fetch('/api/liturgia');
             
-            if (!response.ok) throw new Error("Błąd sieci");
+            if (!response.ok) throw new Error("Błąd serwera");
 
             const data = await response.json();
             
-            if (data && data.data) {
-                localStorage.setItem(`readings_${dateStr}`, JSON.stringify(data.data));
-                wyswietl(data.data);
-            } else {
-                throw new Error("Brak danych");
-            }
+            statusEl.style.display = 'none';
+            containerEl.style.display = 'block';
+            
+            const mainReading = document.getElementById('main-reading');
+            mainReading.innerHTML = JSON.stringify(data, null, 2);
         } catch (error) {
             console.error(error);
-            statusEl.innerText = "Nie udało się pobrać czytań. Sprawdź połączenie lub CORS.";
-        }
-    }
-
-    function wyswietl(data) {
-        document.getElementById('status').style.display = 'none';
-        document.getElementById('readings-container').style.display = 'block';
-        
-        const mainReading = document.getElementById('main-reading');
-        
-        if (Array.isArray(data)) {
-            mainReading.innerHTML = data.map(r => `
-                <h3 style="color: #ffd700; margin-top: 15px;">${r.title || r.type}</h3>
-                <p><b>${r.ref || ''}</b></p>
-                <div>${r.text || ''}</div>
-            `).join('<hr style="border-color: #333; margin: 20px 0;">');
-        } else if (data.text) {
-            mainReading.innerHTML = data.text;
+            statusEl.innerText = "Nie udało się pobrać czytań z Vercel API.";
         }
     }
 

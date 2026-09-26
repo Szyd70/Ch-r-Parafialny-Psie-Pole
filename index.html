@@ -1,413 +1,266 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Śpiewnik Chóralny - Pomoce Głosowe</title>
-  <style>
-    /* Czarno-biały, minimalistyczny motyw */
-    :root {
-      --bg-color: #ffffff;
-      --text-color: #121212;
-      --border-color: #cccccc;
-      --card-bg: #f9f9f9;
-      --button-bg: #121212;
-      --button-text: #ffffff;
-      --button-hover: #333333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liturgia na Dziś - Służba Muzyczna</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #4caf50;
+            --gold: #ffd700;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      line-height: 1.5;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+        }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-    header {
-      border-bottom: 2px solid var(--text-color);
-      padding-bottom: 15px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
 
-    h1, h2, h3 {
-      margin: 0 0 10px 0;
-      font-weight: 700;
-    }
+        h1 {
+            margin: 0 0 6px 0;
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
 
-    button {
-      background-color: var(--button-bg);
-      color: var(--button-text);
-      border: 1px solid var(--button-bg);
-      padding: 10px 16px;
-      font-size: 14px;
-      cursor: pointer;
-      font-weight: 600;
-      border-radius: 4px;
-    }
+        .date-badge {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
 
-    button:hover {
-      background-color: var(--button-hover);
-    }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-left: 4px solid var(--accent);
+        }
 
-    .button-secondary {
-      background-color: transparent;
-      color: var(--text-color);
-      border: 1px solid var(--text-color);
-    }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
 
-    .button-secondary:hover {
-      background-color: #eee;
-    }
+        .card-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
 
-    /* Sekcja wyboru utworów */
-    .song-list {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
+        .sigla {
+            font-size: 0.85rem;
+            background: #2a2a2a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--gold);
+        }
 
-    .song-btn {
-      background-color: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-    }
+        .card-body {
+            line-height: 1.6;
+            font-size: 1rem;
+            white-space: pre-wrap;
+        }
 
-    .song-btn.active {
-      background-color: var(--button-bg);
-      color: var(--button-text);
-    }
+        .psalm-refren {
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: rgba(255, 215, 0, 0.1);
+            border-radius: 4px;
+        }
 
-    /* Formularz dodawania utworu */
-    .form-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 20px;
-      border-radius: 6px;
-      margin-bottom: 30px;
-      display: none;
-    }
+        .status {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .form-group input[type="text"],
-    .form-group textarea,
-    .form-group input[type="file"] {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      border: 1px solid var(--border-color);
-      background-color: #fff;
-    }
-
-    .grid-inputs {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-    }
-
-    /* Widok utworu */
-    .song-view {
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-    }
-
-    /* Odtwarzacze głosów */
-    .audio-section {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 15px;
-      border-radius: 6px;
-    }
-
-    .audio-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 15px;
-      margin-top: 10px;
-    }
-
-    .audio-item {
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      background-color: #fff;
-      border-radius: 4px;
-    }
-
-    .audio-item label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    audio {
-      width: 100%;
-      height: 36px;
-    }
-
-    /* Sekcja nut */
-    .sheet-section {
-      text-align: center;
-      border: 1px solid var(--border-color);
-      padding: 10px;
-      background-color: #fff;
-    }
-
-    .sheet-img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 0 auto;
-    }
-
-    /* Sekcja tekstu */
-    .lyrics-section {
-      white-space: pre-wrap;
-      font-size: 16px;
-      background-color: var(--card-bg);
-      padding: 15px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-    }
-  </style>
+        .btn-reload {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <header>
-    <h1>Materiały dla Chóru</h1>
-    <button id="toggleFormBtn" class="button-secondary" onclick="toggleForm()">+ Dodaj nowy utwór</button>
-  </header>
+    <header>
+        <h1 id="swieto-title">Liturgia Słowa</h1>
+        <div class="date-badge" id="liturgia-date">Pobieranie danych...</div>
+    </header>
 
-  <!-- FORMULARZ DODAWANIA UTWORU -->
-  <div id="addSongForm" class="form-card">
-    <h2>Dodaj nowy utwór do nauki</h2>
-    <form id="songForm" onsubmit="saveSong(event)">
-      <div class="form-group">
-        <label for="title">Tytuł utworu:</label>
-        <input type="text" id="title" required placeholder="np. Gaude Mater Polonia">
-      </div>
+    <div id="status" class="status">Pobieranie czytań liturgicznych...</div>
 
-      <div class="form-group">
-        <label for="sheet">Plik z nutami (obrazek JPG/PNG):</label>
-        <input type="file" id="sheet" accept="image/*" required>
-      </div>
-
-      <div class="form-group">
-        <label>Pliki audio (.mp3 / .wav):</label>
-        <div class="grid-inputs">
-          <div>
-            <label for="audioSATB">Wszyscy (SATB):</label>
-            <input type="file" id="audioSATB" accept="audio/*">
-          </div>
-          <div>
-            <label for="audioS">Sopran (S):</label>
-            <input type="file" id="audioS" accept="audio/*">
-          </div>
-          <div>
-            <label for="audioA">Alt (A):</label>
-            <input type="file" id="audioA" accept="audio/*">
-          </div>
-          <div>
-            <label for="audioT">Tenor (T):</label>
-            <input type="file" id="audioT" accept="audio/*">
-          </div>
-          <div>
-            <label for="audioB">Bas (B):</label>
-            <input type="file" id="audioB" accept="audio/*">
-          </div>
+    <div id="readings-container" style="display: none;">
+        <!-- I Czytanie -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Pierwsze Czytanie</span>
+                <span class="sigla" id="c1-sigla"></span>
+            </div>
+            <div class="card-body" id="c1-text"></div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="lyrics">Tekst utworu:</label>
-        <textarea id="lyrics" rows="5" placeholder="Wpisz tekst pieśni..."></textarea>
-      </div>
+        <!-- Psalm Responsoryjny -->
+        <div class="card" style="border-left-color: var(--gold);">
+            <div class="card-header">
+                <span class="card-title" style="color: var(--gold);">Psalm Responsoryjny</span>
+                <span class="sigla" id="psalm-sigla"></span>
+            </div>
+            <div class="psalm-refren" id="psalm-refren"></div>
+            <div class="card-body" id="psalm-text"></div>
+        </div>
 
-      <button type="submit">Zapisz utwór</button>
-    </form>
-  </div>
+        <!-- II Czytanie -->
+        <div class="card" id="c2-card">
+            <div class="card-header">
+                <span class="card-title">Drugie Czytanie</span>
+                <span class="sigla" id="c2-sigla"></span>
+            </div>
+            <div class="card-body" id="c2-text"></div>
+        </div>
 
-  <!-- LISTA UTWORÓW -->
-  <div class="song-list" id="songButtons"></div>
-
-  <!-- WIDOK WYBRANEGO UTWORU -->
-  <div id="songContainer" class="song-view" style="display: none;">
-    <h2 id="songTitle"></h2>
-
-    <!-- ODTWARZACZE AUDIO -->
-    <div class="audio-section">
-      <h3>Odtwarzacze głosów:</h3>
-      <div class="audio-grid">
-        <div class="audio-item">
-          <label>Tutti (SATB)</label>
-          <audio id="playerSATB" controls></audio>
+        <!-- Ewangelia -->
+        <div class="card" style="border-left-color: #e91e63;">
+            <div class="card-header">
+                <span class="card-title" style="color: #e91e63;">Ewangelia</span>
+                <span class="sigla" id="ewangelia-sigla"></span>
+            </div>
+            <div class="card-body" id="ewangelia-text"></div>
         </div>
-        <div class="audio-item">
-          <label>Sopran (S)</label>
-          <audio id="playerS" controls></audio>
-        </div>
-        <div class="audio-item">
-          <label>Alt (A)</label>
-          <audio id="playerA" controls></audio>
-        </div>
-        <div class="audio-item">
-          <label>Tenor (T)</label>
-          <audio id="playerT" controls></audio>
-        </div>
-        <div class="audio-item">
-          <label>Bas (B)</label>
-          <audio id="playerB" controls></audio>
-        </div>
-      </div>
     </div>
 
-    <!-- PODGLĄD NUT -->
-    <div class="sheet-section">
-      <h3>Nuty:</h3>
-      <img id="sheetImage" class="sheet-img" src="" alt="Podgląd nut">
-    </div>
-
-    <!-- TEKST UTWORU -->
-    <div>
-      <h3>Tekst utworu:</h3>
-      <div id="songLyrics" class="lyrics-section"></div>
-    </div>
-  </div>
+    <button class="btn-reload" onclick="pobierzCzytania()">Odśwież Czytania</button>
 </div>
 
 <script>
-  let songs = [];
-  let currentSongIndex = null;
-
-  function toggleForm() {
-    const form = document.getElementById('addSongForm');
-    const btn = document.getElementById('toggleFormBtn');
-    if (form.style.display === 'block') {
-      form.style.display = 'none';
-      btn.innerText = '+ Dodaj nowy utwór';
-    } else {
-      form.style.display = 'block';
-      btn.innerText = 'Zamknij formularz';
+    // Automatycznie ustaw na jutrzejszą niedzielę (2026-09-27)
+    function getTomorrowDateString() {
+        const d = new Date();
+        d.setDate(d.getDate() + 1); // Jutro
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
-  }
 
-  // Odczyt pliku do URL (Base64 / Blob URL)
-  function readFileAsURL(file) {
-    return new Promise((resolve) => {
-      if (!file) {
-        resolve('');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
-  }
+    async function pobierzCzytania() {
+        const targetDate = getTomorrowDateString();
+        const statusEl = document.getElementById('status');
+        const containerEl = document.getElementById('readings-container');
+        
+        statusEl.style.display = 'block';
+        statusEl.innerText = `Pobieranie czytań na jutro (${targetDate})...`;
+        containerEl.style.display = 'none';
 
-  async function saveSong(event) {
-    event.preventDefault();
+        // 1. Sprawdź pamięć podręczną (Offline Cache)
+        const cachedData = localStorage.getItem(`readings_${targetDate}`);
+        if (cachedData) {
+            renderData(JSON.parse(cachedData));
+            statusEl.style.display = 'none';
+            containerEl.style.display = 'block';
+            console.log("Załadowano czytania z pamięci podręcznej (Offline)");
+        }
 
-    const title = document.getElementById('title').value;
-    const lyrics = document.getElementById('lyrics').value;
+        // 2. Pobierz najnowsze dane z API Niedziela.pl / Katolik API
+        try {
+            const response = await fetch(`https://niedziela.pl/api/liturgia/${targetDate}`);
+            
+            if (!response.ok) {
+                throw new Error("Błąd sieci podczas pobierania czytań.");
+            }
 
-    const sheetFile = document.getElementById('sheet').files[0];
-    const sheetUrl = await readFileAsURL(sheetFile);
-
-    const satbUrl = await readFileAsURL(document.getElementById('audioSATB').files[0]);
-    const sUrl    = await readFileAsURL(document.getElementById('audioS').files[0]);
-    const aUrl    = await readFileAsURL(document.getElementById('audioA').files[0]);
-    const tUrl    = await readFileAsURL(document.getElementById('audioT').files[0]);
-    const bUrl    = await readFileAsURL(document.getElementById('audioB').files[0]);
-
-    const newSong = {
-      title,
-      sheetUrl,
-      lyrics,
-      audio: {
-        satb: satbUrl,
-        s: sUrl,
-        a: aUrl,
-        t: tUrl,
-        b: bUrl
-      }
-    };
-
-    songs.push(newSong);
-    renderSongButtons();
-    selectSong(songs.length - 1);
-
-    // Reset formularza
-    document.getElementById('songForm').reset();
-    toggleForm();
-  }
-
-  function renderSongButtons() {
-    const container = document.getElementById('songButtons');
-    container.innerHTML = '';
-
-    songs.forEach((song, index) => {
-      const btn = document.createElement('button');
-      btn.className = `song-btn ${index === currentSongIndex ? 'active' : ''}`;
-      btn.innerText = song.title;
-      btn.onclick = () => selectSong(index);
-      container.appendChild(btn);
-    });
-  }
-
-  function selectSong(index) {
-    currentSongIndex = index;
-    renderSongButtons();
-
-    const song = songs[index];
-    document.getElementById('songContainer').style.display = 'flex';
-    document.getElementById('songTitle').innerText = song.title;
-    document.getElementById('songLyrics').innerText = song.lyrics || 'Brak wpisanego tekstu.';
-
-    // Nuty
-    const sheetImg = document.getElementById('sheetImage');
-    sheetImg.src = song.sheetUrl;
-
-    // Przypisanie źródeł audio
-    setAudioSource('playerSATB', song.audio.satb);
-    setAudioSource('playerS', song.audio.s);
-    setAudioSource('playerA', song.audio.a);
-    setAudioSource('playerT', song.audio.t);
-    setAudioSource('playerB', song.audio.b);
-  }
-
-  function setAudioSource(playerId, src) {
-    const player = document.getElementById(playerId);
-    const parentContainer = player.parentElement;
-
-    if (src) {
-      player.src = src;
-      parentContainer.style.display = 'block';
-    } else {
-      player.src = '';
-      parentContainer.style.display = 'none'; // Ukrywamy odtwarzacz, jeśli nie dodano ścieżki
+            const data = await response.json();
+            
+            // Zapisz w pamięci lokalnej pod tryb offline na chórze
+            localStorage.setItem(`readings_${targetDate}`, JSON.stringify(data));
+            
+            renderData(data);
+            statusEl.style.display = 'none';
+            containerEl.style.display = 'block';
+        } catch (error) {
+            console.warn("Nie udało się pobrać nowych danych z API. Próba użycia danych zapasowych:", error);
+            
+            if (!cachedData) {
+                // Zapytanie awaryjne przez darmowy CORS Proxy w razie obostrzeń przeglądarki
+                try {
+                    const fallbackResp = await fetch(`https://api.aladhan.com/v1/gregorian/${targetDate}`); // rezerwa
+                    statusEl.innerText = "Brak połączenia z siecią i brak zapisanych czytań offline.";
+                } catch(e) {
+                    statusEl.innerText = "Błąd wczytywania: Sprawdź połączenie z Internetem.";
+                }
+            }
+        }
     }
-  }
+
+    function renderData(data) {
+        document.getElementById('liturgia-date').innerText = data.data_str || getTomorrowDateString();
+        if (data.swieto) {
+            document.getElementById('swieto-title').innerText = data.swieto;
+        }
+
+        // I Czytanie
+        if (data.czytanie1) {
+            document.getElementById('c1-sigla').innerText = data.czytanie1.sigla || '';
+            document.getElementById('c1-text').innerText = data.czytanie1.tekst || data.czytanie1;
+        }
+
+        // Psalm
+        if (data.psalm) {
+            document.getElementById('psalm-sigla').innerText = data.psalm.sigla || '';
+            document.getElementById('psalm-refren').innerText = data.psalm.refren ? `Refren: ${data.psalm.refren}` : '';
+            document.getElementById('psalm-text').innerText = data.psalm.tekst || data.psalm;
+        }
+
+        // II Czytanie (o ile występuje)
+        if (data.czytanie2 && (data.czytanie2.tekst || typeof data.czytanie2 === 'string')) {
+            document.getElementById('c2-card').style.display = 'block';
+            document.getElementById('c2-sigla').innerText = data.czytanie2.sigla || '';
+            document.getElementById('c2-text').innerText = data.czytanie2.tekst || data.czytanie2;
+        } else {
+            document.getElementById('c2-card').style.display = 'none';
+        }
+
+        // Ewangelia
+        if (data.ewangelia) {
+            document.getElementById('ewangelia-sigla').innerText = data.ewangelia.sigla || '';
+            document.getElementById('ewangelia-text').innerText = data.ewangelia.tekst || data.ewangelia;
+        }
+    }
+
+    // Uruchom przy starcie
+    window.addEventListener('DOMContentLoaded', pobierzCzytania);
 </script>
 
 </body>

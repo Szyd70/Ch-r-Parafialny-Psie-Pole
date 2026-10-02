@@ -426,7 +426,7 @@
       border-radius: 4px;
     }
 
-    /* Sekcja Odtwarzacza Audio */
+    /* Odtwarzacz Audio */
     .audio-player-container {
       width: 100%;
       max-width: 500px;
@@ -524,7 +524,6 @@
       font-family: 'Cinzel', serif;
     }
 
-    /* Style dla Podstrony Czytań */
     .readings-container {
       width: 100%;
       min-height: 70vh;
@@ -616,7 +615,7 @@
       <div id="repertuarList"></div>
     </div>
 
-    <!-- PODSTRONA 4: CZYTANIA LITURGICZNE (BREWIARZ.PL RSS) -->
+    <!-- PODSTRONA 4: CZYTANIA LITURGICZNE -->
     <div id="viewCzytania" class="section-view">
       <div class="readings-container" id="readingsContent">
         <div style="text-align:center; padding: 40px; color:#a3a3a3;">Ładowanie czytań mszalnych z serwisu Brewiarz.pl...</div>
@@ -644,7 +643,6 @@
     <div class="modal-body">
       <img id="modalImage" src="" alt="Nuty" />
       
-      <!-- ODTWARZACZ AUDIO DLA MODALA -->
       <div id="modalAudioSection" class="audio-player-container" style="display:none;">
         <div class="audio-player-title">🎵 Nagrania i materiały głosowe:</div>
         <div id="modalAudioList"></div>
@@ -694,7 +692,7 @@
     let currentRepertuar = JSON.parse(localStorage.getItem('currentRepertuar')) || [];
     let archiwumRepertuarow = [];
 
-    // Firestore Sync
+    // --- FIRESTORE API ---
     async function loadCloudData() {
       if (!window.useFirestore || !window.db) return;
       try {
@@ -725,41 +723,18 @@
       }
     }
 
-    // LOGOWANIE / WYLOGOWANIE ADMINA
-    window.handleAdminToggle = function() {
-      if (isAdminLoggedIn) {
-        isAdminLoggedIn = false;
-        document.body.classList.remove('is-admin');
-        const btn = document.getElementById('adminAuthBtn');
-        btn.innerText = '🔑 Zaloguj';
-        btn.classList.remove('admin-active');
-        alert('Wylogowano z trybu administratora.');
-      } else {
-        const pass = prompt('Podaj hasło administratora:');
-        if (pass === '0410') {
-          isAdminLoggedIn = true;
-          document.body.classList.add('is-admin');
-          const btn = document.getElementById('adminAuthBtn');
-          btn.innerText = '🔓 Admin (Wyloguj)';
-          btn.classList.add('admin-active');
-          alert('Zalogowano jako Administrator! Funkcje edycji są teraz widoczne.');
-        } else if (pass !== null) {
-          alert('Niepoprawne hasło!');
-        }
-      }
-    }
-
+    // --- GOOGLE DRIVE API & PARSER ---
     window.loadSongs = async function() {
       await loadCloudData();
 
       const cacheBuster = `&_cb=${Date.now()}`;
-      // Szukamy obrazów (nuty) ORAZ nagrań audio (m4a, mp3, wav, ogg)
+      // Szukamy obrazów (nuty) ORAZ plików audio
       const query = `'${FOLDER_ID}' in parents and trashed = false and (mimeType contains 'image/' or mimeType contains 'audio/')`;
       const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType,thumbnailLink)&pageSize=1000&key=${API_KEY}${cacheBuster}`;
 
       try {
         const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error('Błąd połączenia z Google Drive');
+        if (!response.ok) throw new Error('Błąd połączenia z Google Drive API');
 
         const data = await response.json();
         const files = data.files || [];
@@ -767,10 +742,10 @@
         const imageFiles = files.filter(f => f.mimeType.includes('image/'));
         const audioFiles = files.filter(f => f.mimeType.includes('audio/'));
 
-        // Tworzenie bazy pieśni na podstawie plików obrazów
+        // Parsowanie obrazów na piosenki
         allSongs = imageFiles.map(file => parseFileData(file));
 
-        // Dopasowywanie nagrań audio do pieśni
+        // Powiązanie ścieżek dźwiękowych
         attachAudioToSongs(audioFiles);
 
         allSongs.sort((a, b) => a.cleanTitle.localeCompare(b.cleanTitle, 'pl'));
@@ -779,7 +754,7 @@
         renderSongs();
         updateRepertuarBadge();
       } catch (err) {
-        console.error(`Błąd ładowania pieśni: ${err.message}`);
+        console.error(`Błąd Google Drive API: ${err.message}`);
       }
     }
 
@@ -809,20 +784,16 @@
         cleanTitle: rawName,
         slideNumber: slideNum,
         category: category,
-        audioTracks: [] // Lista plików audio przypisanych do pieśni
+        audioTracks: []
       };
     }
 
-    // Przypisuje audio do pieśni na podstawie zbieżności nazwy pliku
     function attachAudioToSongs(audioFiles) {
       audioFiles.forEach(audio => {
         const audioName = audio.name.replace(/\.(m4a|mp3|wav|ogg|aac)$/i, '').trim();
 
         allSongs.forEach(song => {
-          // Jeśli nazwa pliku audio zawiera tytuł pieśni
           if (audioName.toLowerCase().includes(song.cleanTitle.toLowerCase())) {
-            
-            // Określenie głosu / roli na podstawie nazwy pliku
             let voiceLabel = 'Nagranie / Tutti';
             const lower = audioName.toLowerCase();
             if (lower.includes('sopran') || lower.includes(' (s)')) voiceLabel = 'Sopran (S)';
@@ -841,6 +812,31 @@
       });
     }
 
+    // --- ADMIN AUTH ---
+    window.handleAdminToggle = function() {
+      if (isAdminLoggedIn) {
+        isAdminLoggedIn = false;
+        document.body.classList.remove('is-admin');
+        const btn = document.getElementById('adminAuthBtn');
+        btn.innerText = '🔑 Zaloguj';
+        btn.classList.remove('admin-active');
+        alert('Wylogowano z trybu administratora.');
+      } else {
+        const pass = prompt('Podaj hasło administratora:');
+        if (pass === '0410') {
+          isAdminLoggedIn = true;
+          document.body.classList.add('is-admin');
+          const btn = document.getElementById('adminAuthBtn');
+          btn.innerText = '🔓 Admin (Wyloguj)';
+          btn.classList.add('admin-active');
+          alert('Zalogowano jako Administrator! Funkcje edycji są teraz widoczne.');
+        } else if (pass !== null) {
+          alert('Niepoprawne hasło!');
+        }
+      }
+    }
+
+    // --- WIDOKI I RENDERING ---
     window.renderSongs = function() {
       const gridEl = document.getElementById('songGrid');
       gridEl.innerHTML = '';
@@ -862,7 +858,6 @@
       const timestamp = Date.now();
       filtered.forEach(song => {
         const thumbUrl = `https://lh3.googleusercontent.com/d/${song.id}=s400?v=${timestamp}`;
-        const fullUrl = `https://lh3.googleusercontent.com/d/${song.id}=s2000?v=${timestamp}`;
 
         const card = document.createElement('div');
         card.className = 'song-card';
@@ -910,7 +905,7 @@
       renderSongs();
     }
 
-    // EDYCJA PIEŚNI
+    // --- EDYCJA PIEŚNI ---
     window.openEditModal = function(songId) {
       if (!isAdminLoggedIn) return;
 
@@ -975,7 +970,7 @@
       editingSongId = null;
     }
 
-    // REPERTUAR
+    // --- OBSŁUGA REPERTUARU ---
     window.toggleRepertuar = function(songId) {
       const index = currentRepertuar.findIndex(s => s.id === songId);
       if (index > -1) {
@@ -1109,7 +1104,7 @@
       renderArchiwumList();
     }
 
-    // POBIERANIE PEŁNYCH TEKSTÓW Z OFICJALNEGO RSS BREWIARZ.PL
+    // --- CZYTANIA LITURGICZNE BREWIARZ.PL ---
     window.loadFullReadings = async function() {
       const container = document.getElementById('readingsContent');
       container.innerHTML = '<div style="text-align:center; padding:40px; color:#a3a3a3;">Ładowanie czytań mszalnych z Brewiarz.pl...</div>';
@@ -1122,7 +1117,6 @@
         if (!response.ok) throw new Error('Błąd połączenia z serwerem');
 
         const json = await response.json();
-        
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(json.contents, 'text/xml');
 
@@ -1161,7 +1155,7 @@
       }
     }
 
-    // NAWIGACJA
+    // --- NAWIGACJA ZAKŁADEK ---
     window.switchView = function(viewName) {
       document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -1196,6 +1190,7 @@
       }
     }
 
+    // --- MODAL PODGLĄDU ---
     window.openModal = function(songId) {
       const song = allSongs.find(s => s.id === songId);
       if (!song) return;
@@ -1208,7 +1203,6 @@
       document.getElementById('modalSlide').innerText = song.slideNumber ? `Slajd #${song.slideNumber}` : '';
       document.getElementById('modalImage').src = imageUrl;
 
-      // Sekcja Audio w modalu
       const audioSec = document.getElementById('modalAudioSection');
       const audioList = document.getElementById('modalAudioList');
 
@@ -1232,7 +1226,6 @@
       document.getElementById('imageModal').classList.remove('active');
       document.getElementById('modalImage').src = '';
       
-      // Zatrzymaj odtwarzanie audio po zamknięciu okna
       const modalAudio = document.getElementById('modalAudioList');
       modalAudio.querySelectorAll('audio').forEach(a => a.pause());
       modalAudio.innerHTML = '';
@@ -1248,7 +1241,6 @@
       navigator.serviceWorker.register('/sw.js?v=' + Date.now()).catch(err => console.log('SW error:', err));
     }
 
-    // Inicjalizacja bazy pieśni w tle
     loadSongs();
   </script>
 </body>

@@ -196,7 +196,6 @@
       listEl.innerHTML = '';
 
       const cacheBuster = `&_cb=${Date.now()}`;
-      // Szukamy wyłącznie plików audio
       const query = `'${FOLDER_ID}' in parents and trashed = false and mimeType contains 'audio/'`;
       const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType)&pageSize=1000&key=${API_KEY}${cacheBuster}`;
 
@@ -240,13 +239,16 @@
         badgeClass = 'bas';
       }
 
+      // Bezpośredni strumień danych z Google Drive API v3
+      const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
+
       return {
         id: file.id,
         fullName: file.name,
         cleanTitle: rawName,
         voiceLabel: voiceLabel,
         badgeClass: badgeClass,
-        streamUrl: `https://drive.google.com/uc?export=download&id=${file.id}`
+        streamUrl: streamUrl
       };
     }
 
@@ -270,14 +272,13 @@
             <div class="audio-title">${item.cleanTitle}</div>
             <span class="voice-badge ${item.badgeClass}">${item.voiceLabel}</span>
           </div>
-          <audio controls preload="none" src="${item.streamUrl}"></audio>
+          <audio controls crossorigin="anonymous" preload="metadata" src="${item.streamUrl}"></audio>
         </div>
       `).join('');
     }
 
     document.getElementById('searchInput').addEventListener('input', renderAudioList);
 
-    // Start
     loadAudioFiles();
   </script>
 </body>

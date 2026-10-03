@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Białe tło -->
+  <rect width="512" height="512" rx="100" fill="#ffffff"/>
+  <!-- Czarna nuta -->
+  <path d="M360 110 v170 a 55 55 0 1 1 -40 -52 v -80 l -120 30 v 110 a 55 55 0 1 1 -40 -52 v -160 l 200 -40 z" fill="#000000"/>
+</svg>

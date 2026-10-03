@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Śpiewnik Chóralny - Nuty i Głosy</title>
+  <title>Śpiewnik Chóralny</title>
 
   <!-- Cache-Control -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -13,12 +13,21 @@
   <meta name="theme-color" content="#0a0a0a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Elegant & Classic typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg-color: #0a0a0a;
+      --card-bg: #141414;
+      --border-color: #262626;
+      --text-main: #f5f5f5;
+      --text-muted: #a3a3a3;
+      --accent-white: #ffffff;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -28,22 +37,21 @@
 
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background-color: #0a0a0a;
-      color: #e5e5e5;
+      background-color: var(--bg-color);
+      color: var(--text-main);
       min-height: 100vh;
-      padding: 12px;
-      padding-bottom: 40px;
+      padding-bottom: 30px;
     }
 
+    /* HEADER & NAVIGATION */
     header {
       position: sticky;
       top: 0;
       background-color: rgba(10, 10, 10, 0.96);
-      backdrop-filter: blur(10px);
-      padding: 10px 0 14px 0;
-      z-index: 20;
-      border-bottom: 1px solid #262626;
-      margin-bottom: 16px;
+      backdrop-filter: blur(12px);
+      padding: 12px 16px;
+      z-index: 50;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .header-top {
@@ -53,197 +61,294 @@
       margin-bottom: 12px;
     }
 
-    h1 {
+    h1.main-title {
       font-family: 'Cinzel', serif;
       font-size: 1.15rem;
       font-weight: 700;
-      letter-spacing: 1px;
-      color: #f5f5f5;
+      letter-spacing: 2px;
+      color: var(--text-main);
       text-transform: uppercase;
       text-align: center;
       flex: 1;
     }
 
-    .icon-btn {
-      background-color: #141414;
+    .btn {
+      background-color: var(--card-bg);
       border: 1px solid #333333;
-      color: #e5e5e5;
-      padding: 6px 12px;
+      color: var(--text-main);
+      padding: 8px 14px;
       border-radius: 6px;
       font-size: 0.8rem;
+      font-weight: 600;
       cursor: pointer;
-      font-weight: 500;
       transition: all 0.2s ease;
     }
-
-    .icon-btn:active {
+    .btn:active {
+      transform: scale(0.96);
       background-color: #262626;
-      transform: scale(0.95);
+    }
+    .btn-primary {
+      background-color: var(--text-main);
+      color: var(--bg-color);
+      border-color: var(--text-main);
+      font-weight: 700;
     }
 
-    .search-container {
-      margin-bottom: 8px;
+    /* VOICE SELECTOR BAR */
+    .voice-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 12px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
     }
 
-    .search-bar {
-      width: 100%;
-      padding: 11px 14px;
-      font-size: 0.95rem;
-      border-radius: 6px;
-      border: 1px solid #333333;
-      background-color: #141414;
-      color: #ffffff;
+    .voice-selector {
+      background: #0a0a0a;
+      color: #fff;
+      border: 1px solid #333;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
       outline: none;
     }
 
-    .search-bar:focus {
-      border-color: #38bdf8;
-    }
-
-    /* Lista Pieśni */
-    .song-list {
+    /* NAV TABS */
+    .nav-tabs {
       display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .song-card {
-      background-color: #141414;
-      border: 1px solid #262626;
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .song-title {
-      font-family: 'Cinzel', serif;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #ffffff;
-      border-bottom: 1px solid #262626;
-      padding-bottom: 8px;
-    }
-
-    /* Podgląd Nut JPG */
-    .sheet-wrapper {
-      width: 100%;
-      background-color: #000;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #262626;
-      text-align: center;
-    }
-
-    .sheet-img {
-      width: 100%;
-      max-height: 500px;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto;
-      cursor: pointer;
-    }
-
-    /* Sekcja Głosów / Odtwarzaczy */
-    .audio-section {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background-color: #0d0d0d;
-      padding: 12px;
+      gap: 6px;
+      background-color: var(--card-bg);
+      padding: 4px;
       border-radius: 8px;
-      border: 1px solid #222;
+      border: 1px solid var(--border-color);
     }
 
-    .audio-section-title {
-      font-size: 0.8rem;
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 4px;
+      font-size: 0.78rem;
       font-weight: 700;
-      color: #a3a3a3;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .audio-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .audio-row {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      background-color: #141414;
-      padding: 8px 10px;
       border-radius: 6px;
-      border: 1px solid #262626;
-    }
-
-    .voice-label {
-      font-size: 0.75rem;
-      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+    }
+    .tab-btn.active {
+      background-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    /* LAYOUT VIEWS */
+    main { padding: 16px; }
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    /* DASHBOARD HERO */
+    .hero-card {
+      background: linear-gradient(180deg, #181818 0%, #0d0d0d 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .hero-card h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+    .hero-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .blocks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .block-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .block-card:active { transform: scale(0.98); }
+    .block-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+    .block-card p { font-size: 0.82rem; color: var(--text-muted); }
 
-    .voice-badge {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-
-    .voice-tutti { color: #38bdf8; }
-    .voice-sopran { color: #a5b4fc; }
-    .voice-alt { color: #fbcfe8; }
-    .voice-tenor { color: #a7f3d0; }
-    .voice-bas { color: #fde68a; }
-
-    audio {
+    /* SEARCH & FILTERS */
+    .search-box {
       width: 100%;
-      height: 36px;
+      padding: 12px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
       outline: none;
+      margin-bottom: 12px;
+    }
+    .search-box:focus { border-color: #525252; }
+
+    /* CARDS LIST */
+    .song-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .song-item {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .song-item-info strong {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+    .song-item-info span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
 
-    /* Modal powiększenia nut */
-    .modal {
-      display: none;
+    /* SONG PAGE (FULLSCREEN SUBPAGE) */
+    #viewSongDetail {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background-color: rgba(0, 0, 0, 0.95);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--bg-color);
       z-index: 100;
+      overflow-y: auto;
+      padding: 16px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #viewSongDetail.active { display: flex; }
+
+    .song-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+    .song-title-lg {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-align: center;
+      flex: 1;
+      padding: 0 10px;
+    }
+
+    /* SHEET MUSIC VIEWER WITH PINCH-ZOOM */
+    .sheet-container {
+      position: relative;
+      width: 100%;
+      background-color: #000;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
       justify-content: center;
       align-items: center;
-      padding: 10px;
+      min-height: 300px;
+      touch-action: none;
     }
-    .modal.active { display: flex; }
-    .modal img {
+    .sheet-img {
       max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+      height: auto;
+      transition: transform 0.1s ease-out;
+      transform-origin: center center;
     }
-    .modal-close {
+    .zoom-controls {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      background: #262626;
+      bottom: 10px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+    .zoom-btn {
+      background: rgba(20,20,20,0.85);
+      border: 1px solid #404040;
       color: #fff;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
       font-weight: bold;
       cursor: pointer;
+    }
+
+    /* AUDIO SECTION */
+    .audio-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .audio-box h4 {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .audio-track {
+      margin-bottom: 10px;
+    }
+    .audio-track label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    audio { width: 100%; height: 36px; }
+
+    /* LYRICS SECTION */
+    .lyrics-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      white-space: pre-wrap;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #e5e5e5;
     }
 
     .status-msg {
       text-align: center;
       padding: 40px 16px;
-      color: #737373;
-      font-size: 0.95rem;
+      color: var(--text-muted);
     }
   </style>
 </head>
@@ -251,25 +356,106 @@
 
   <header>
     <div class="header-top">
-      <button class="icon-btn" onclick="loadCatalog()">↻ Odśwież</button>
-      <h1>Śpiewnik Chóralny</h1>
-      <span style="font-size: 0.8rem; color: #737373;" id="songCount">0 pieśni</span>
+      <button class="btn" onclick="loadCatalog()">↻ Odśwież</button>
+      <h1 class="main-title">Śpiewnik Chóralny</h1>
+      <span style="font-size:0.75rem; color:var(--text-muted);" id="songCount">0 pieśni</span>
     </div>
 
-    <div class="search-container">
-      <input type="text" id="searchInput" class="search-bar" placeholder="Szukaj pieśni..." />
+    <!-- VOICE SELECTOR -->
+    <div class="voice-bar">
+      <span>Twój głos w chórze:</span>
+      <select id="userVoiceSelect" class="voice-selector" onchange="changeUserVoice(this.value)">
+        <option value="ALL">Wszyscy / Dyrygent</option>
+        <option value="SOPRAN">Sopran (S)</option>
+        <option value="ALT">Alt (A)</option>
+        <option value="TENOR">Tenor (T)</option>
+        <option value="BAS">Bas (B)</option>
+      </select>
+    </div>
+
+    <!-- TABS -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tabHome" onclick="switchView('home')">Główna</button>
+      <button class="tab-btn" id="tabNauka" onclick="switchView('nauka')">Do nauki (<span id="naukaCount">0</span>)</button>
+      <button class="tab-btn" id="tabBaza" onclick="switchView('baza')">Baza Utworów</button>
+      <button class="tab-btn" id="tabArchiwum" onclick="switchView('archiwum')">Archiwum</button>
     </div>
   </header>
 
   <main>
-    <div id="status" class="status-msg">Skandowanie folderów pieśni...</div>
-    <div id="songList" class="song-list"></div>
+    <div id="status" class="status-msg">Ładowanie bazy utworów z Google Drive...</div>
+
+    <!-- 1. STRONA GŁÓWNA -->
+    <div id="viewHome" class="view-section active">
+      <div class="hero-card">
+        <h2>Laudate Dominum</h2>
+        <p>Aplikacja do nauki partii głosowych i zarządzania repertuarem</p>
+        <button class="btn btn-primary" onclick="switchView('nauka')">Otwórz "Do nauki"</button>
+      </div>
+
+      <div class="blocks-grid">
+        <div class="block-card" onclick="switchView('nauka')">
+          <h3><span>📖 Do nauki</span> <small id="homeNaukaBadge">0</small></h3>
+          <p>Twój bieżący zestaw utworów do ćwiczeń na próby.</p>
+        </div>
+        <div class="block-card" onclick="switchView('baza')">
+          <h3><span>🎼 Baza utworów</span></h3>
+          <p>Przeglądaj wszystkie opracowania, szukaj i dodawaj utwory.</p>
+        </div>
+        <div class="block-card" onclick="switchView('archiwum')">
+          <h3><span>📚 Archiwum wydarzeń</span></h3>
+          <p>Zapisane repertuary z minionych wystąpień i mszy.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. DO NAUKI -->
+    <div id="viewNauka" class="view-section">
+      <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <button class="btn" style="flex:1;" onclick="clearNauka()">Wyczyść zestaw</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveNaukaToArchiwum()">💾 Zapisz do Archiwum</button>
+      </div>
+      <div id="naukaList" class="song-grid"></div>
+    </div>
+
+    <!-- 3. BAZA UTWORÓW -->
+    <div id="viewBaza" class="view-section">
+      <input type="text" id="searchInput" class="search-box" placeholder="Szukaj utworu..." oninput="renderBaza()" />
+      <div id="bazaList" class="song-grid"></div>
+    </div>
+
+    <!-- 4. ARCHIWUM WYDARZEŃ -->
+    <div id="viewArchiwum" class="view-section">
+      <div id="archiwumList"></div>
+    </div>
   </main>
 
-  <!-- Modal do powiększania nut -->
-  <div id="imageModal" class="modal" onclick="closeModal()">
-    <button class="modal-close" onclick="closeModal()">✕ Zamknij</button>
-    <img id="modalImg" src="" alt="Nuty" />
+  <!-- PODSTRONA UTWORU (FULLSCREEN PAGE) -->
+  <div id="viewSongDetail">
+    <div class="song-detail-header">
+      <button class="btn" onclick="closeSongDetail()">← Powrót</button>
+      <h2 id="detailTitle" class="song-title-lg">TYTUŁ UTWORU</h2>
+      <button class="btn" id="detailNaukaBtn">+</button>
+    </div>
+
+    <!-- NUTY Z PINCH-ZOOM -->
+    <div class="sheet-container" id="sheetContainer">
+      <img id="detailSheet" class="sheet-img" src="" alt="Nuty" />
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomSheet(0.25)">+</button>
+        <button class="zoom-btn" onclick="zoomSheet(-0.25)">-</button>
+        <button class="zoom-btn" onclick="resetZoom()">↺</button>
+      </div>
+    </div>
+
+    <!-- AUDIO -->
+    <div id="detailAudioSection" class="audio-box" style="display:none;">
+      <h4>Nagrania pomocnicze:</h4>
+      <div id="detailAudioList"></div>
+    </div>
+
+    <!-- TEKST UTWORU -->
+    <div id="detailLyricsSection" class="lyrics-box" style="display:none;"></div>
   </div>
 
   <script>
@@ -277,30 +463,39 @@
     const API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
 
     let allSongs = [];
+    let naukaList = JSON.parse(localStorage.getItem('naukaList')) || [];
+    let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
+    let currentUserVoice = localStorage.getItem('userVoice') || 'ALL';
 
+    let currentZoom = 1;
+
+    // INICJALIZACJA LOGOWANIA GŁOSU
+    document.getElementById('userVoiceSelect').value = currentUserVoice;
+
+    function changeUserVoice(voice) {
+      currentUserVoice = voice;
+      localStorage.setItem('userVoice', voice);
+    }
+
+    // POBIERANIE KATALOGU Z GOOGLE DRIVE
     async function loadCatalog() {
       const statusEl = document.getElementById('status');
-      const listEl = document.getElementById('songList');
       statusEl.style.display = 'block';
-      statusEl.innerText = 'Ładowanie podfolderów z pieśniami...';
-      listEl.innerHTML = '';
 
       const cacheBuster = `&_cb=${Date.now()}`;
       
       try {
-        // 1. Pobierz podfoldery (każdy podfolder to osobny utwór)
         const folderQuery = `'${MAIN_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`;
         const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${API_KEY}${cacheBuster}`;
 
         const folderRes = await fetch(folderUrl, { cache: 'no-store' });
-        if (!folderRes.ok) throw new Error('Błąd pobierania folderów');
+        if (!folderRes.ok) throw new Error('Błąd połączenia');
 
         const folderData = await folderRes.json();
         const songFolders = folderData.files || [];
 
         allSongs = [];
 
-        // 2. Dla każdego folderu pobierz jego zawartość (obraz nut + pliki audio)
         for (const folder of songFolders) {
           const filesQuery = `'${folder.id}' in parents and trashed = false`;
           const filesUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(filesQuery)}&fields=files(id,name,mimeType)&pageSize=50&key=${API_KEY}${cacheBuster}`;
@@ -308,9 +503,7 @@
           const filesRes = await fetch(filesUrl, { cache: 'no-store' });
           if (filesRes.ok) {
             const filesData = await filesRes.json();
-            const files = filesData.files || [];
-
-            const songObj = parseSongFolder(folder.name, files);
+            const songObj = await parseSongFolder(folder.id, folder.name, filesData.files || []);
             allSongs.push(songObj);
           }
         }
@@ -319,118 +512,300 @@
 
         document.getElementById('songCount').innerText = `${allSongs.length} pieśni`;
         statusEl.style.display = 'none';
-        renderSongs();
+        
+        updateBadges();
+        renderBaza();
+        renderNauka();
+        renderArchiwum();
       } catch (err) {
         console.error('Błąd:', err);
-        statusEl.innerText = 'Nie udało się pobrać katalogu pieśni.';
+        statusEl.innerText = 'Błąd podczas ładowania bazy utworów.';
       }
     }
 
-    function parseSongFolder(folderName, files) {
+    async function parseSongFolder(folderId, folderName, files) {
       let sheetUrl = null;
-      let audioTracks = {
-        tutti: null,
-        sopran: null,
-        alt: null,
-        tenor: null,
-        bas: null
-      };
+      let lyricsText = null;
+      let audioTracks = [];
 
-      files.forEach(file => {
-        // Obraz nut JPG/PNG
+      for (const file of files) {
+        const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
+
         if (file.mimeType.includes('image/')) {
-          sheetUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
-        }
-
-        // Pliki audio
-        if (file.mimeType.includes('audio/')) {
+          sheetUrl = streamUrl;
+        } else if (file.mimeType.includes('audio/')) {
           const nameLower = file.name.toLowerCase();
-          const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
+          let voice = 'TUTTI';
 
-          if (nameLower.includes('sopran') || nameLower.includes('- s.')) {
-            audioTracks.sopran = streamUrl;
-          } else if (nameLower.includes('alt') || nameLower.includes('- a.')) {
-            audioTracks.alt = streamUrl;
-          } else if (nameLower.includes('tenor') || nameLower.includes('- t.')) {
-            audioTracks.tenor = streamUrl;
-          } else if (nameLower.includes('bas') || nameLower.includes('- b.')) {
-            audioTracks.bas = streamUrl;
-          } else {
-            audioTracks.tutti = streamUrl;
-          }
+          if (nameLower.includes('sopran') || nameLower.includes('- s.')) voice = 'SOPRAN';
+          else if (nameLower.includes('alt') || nameLower.includes('- a.')) voice = 'ALT';
+          else if (nameLower.includes('tenor') || nameLower.includes('- t.')) voice = 'TENOR';
+          else if (nameLower.includes('bas') || nameLower.includes('- b.')) voice = 'BAS';
+
+          audioTracks.push({ voice, label: getVoiceLabel(voice), url: streamUrl });
+        } else if (file.name.endsWith('.txt')) {
+          try {
+            const txtRes = await fetch(streamUrl);
+            if (txtRes.ok) lyricsText = await txtRes.text();
+          } catch(e) {}
         }
-      });
+      }
 
       return {
+        id: folderId,
         title: folderName,
-        sheetUrl: sheetUrl,
-        audioTracks: audioTracks
+        sheetUrl,
+        audioTracks,
+        lyricsText
       };
     }
 
-    function renderSongs() {
-      const container = document.getElementById('songList');
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-
-      const filtered = allSongs.filter(song => song.title.toLowerCase().includes(searchTerm));
-
-      if (filtered.length === 0) {
-        container.innerHTML = '<div class="status-msg">Brak pieśni spełniających kryteria.</div>';
-        return;
+    function getVoiceLabel(v) {
+      switch(v) {
+        case 'SOPRAN': return 'Sopran (S)';
+        case 'ALT': return 'Alt (A)';
+        case 'TENOR': return 'Tenor (T)';
+        case 'BAS': return 'Bas (B)';
+        default: return 'Tutti / Wszystkie głosy';
       }
-
-      container.innerHTML = filtered.map(song => {
-        const { tutti, sopran, alt, tenor, bas } = song.audioTracks;
-        const hasAudio = tutti || sopran || alt || tenor || bas;
-
-        return `
-          <div class="song-card">
-            <div class="song-title">${song.title}</div>
-
-            ${song.sheetUrl ? `
-              <div class="sheet-wrapper">
-                <img class="sheet-img" src="${song.sheetUrl}" alt="Nuty ${song.title}" onclick="openModal('${song.sheetUrl}')" loading="lazy" />
-              </div>
-            ` : '<div style="color:#666; font-size:0.85rem;">Brak dołączonych nut (JPG)</div>'}
-
-            ${hasAudio ? `
-              <div class="audio-section">
-                <div class="audio-section-title">Odtwarzacze głosów:</div>
-                <div class="audio-grid">
-                  ${tutti ? renderAudioRow('Tutti / Nagranie', 'voice-tutti', tutti) : ''}
-                  ${sopran ? renderAudioRow('Sopran (S)', 'voice-sopran', sopran) : ''}
-                  ${alt ? renderAudioRow('Alt (A)', 'voice-alt', alt) : ''}
-                  ${tenor ? renderAudioRow('Tenor (T)', 'voice-tenor', tenor) : ''}
-                  ${bas ? renderAudioRow('Bas (B)', 'voice-bas', bas) : ''}
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
     }
 
-    function renderAudioRow(label, cssClass, url) {
+    // RENDERING
+    function renderBaza() {
+      const container = document.getElementById('bazaList');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allSongs.filter(s => s.title.toLowerCase().includes(search));
+
+      container.innerHTML = filtered.map(song => renderSongCardHtml(song)).join('');
+    }
+
+    function renderNauka() {
+      const container = document.getElementById('naukaList');
+      if (naukaList.length === 0) {
+        container.innerHTML = '<div class="status-msg">Brak utworów w zestawie do nauki.</div>';
+        return;
+      }
+      container.innerHTML = naukaList.map(song => renderSongCardHtml(song)).join('');
+    }
+
+    function renderSongCardHtml(song) {
+      const inNauka = naukaList.some(s => s.id === song.id);
       return `
-        <div class="audio-row">
-          <div class="voice-label ${cssClass}">${label}</div>
-          <audio controls crossorigin="anonymous" preload="metadata" src="${url}"></audio>
+        <div class="song-item" onclick="openSongDetail('${song.id}')">
+          <div class="song-item-info">
+            <strong>${song.title.toUpperCase()}</strong>
+            <span>Audio: ${song.audioTracks.length} ścieżek</span>
+          </div>
+          <button class="btn" onclick="event.stopPropagation(); toggleNauka('${song.id}')">
+            ${inNauka ? '✓ W nauce' : '+ Do nauki'}
+          </button>
         </div>
       `;
     }
 
-    function openModal(url) {
-      document.getElementById('modalImg').src = url;
-      document.getElementById('imageModal').classList.add('active');
+    // OTWIERANIE PODSTRONY UTWORU
+    function openSongDetail(songId) {
+      const song = allSongs.find(s => s.id === songId);
+      if (!song) return;
+
+      document.getElementById('detailTitle').innerText = song.title.toUpperCase();
+
+      // Nuty
+      const sheetImg = document.getElementById('detailSheet');
+      if (song.sheetUrl) {
+        sheetImg.src = song.sheetUrl;
+        sheetImg.style.display = 'block';
+      } else {
+        sheetImg.style.display = 'none';
+      }
+      resetZoom();
+
+      // Audio z uwzględnieniem wybranego Głosu Chórzysty
+      const audioSec = document.getElementById('detailAudioSection');
+      const audioListEl = document.getElementById('detailAudioList');
+
+      const filteredAudio = song.audioTracks.filter(track => {
+        if (currentUserVoice === 'ALL') return true;
+        return track.voice === 'TUTTI' || track.voice === currentUserVoice;
+      });
+
+      if (filteredAudio.length > 0) {
+        audioSec.style.display = 'block';
+        audioListEl.innerHTML = filteredAudio.map(track => `
+          <div class="audio-track">
+            <label>${track.label}</label>
+            <audio controls crossorigin="anonymous" preload="metadata" src="${track.url}"></audio>
+          </div>
+        `).join('');
+      } else {
+        audioSec.style.display = 'none';
+      }
+
+      // Tekst
+      const lyricsSec = document.getElementById('detailLyricsSection');
+      if (song.lyricsText) {
+        lyricsSec.innerText = song.lyricsText;
+        lyricsSec.style.display = 'block';
+      } else {
+        lyricsSec.style.display = 'none';
+      }
+
+      // Przycisk Dodaj do nauki
+      const naukaBtn = document.getElementById('detailNaukaBtn');
+      const inNauka = naukaList.some(s => s.id === song.id);
+      naukaBtn.innerText = inNauka ? '✓ W nauce' : '+ Do nauki';
+      naukaBtn.onclick = () => {
+        toggleNauka(song.id);
+        const newState = naukaList.some(s => s.id === song.id);
+        naukaBtn.innerText = newState ? '✓ W nauce' : '+ Do nauki';
+      };
+
+      document.getElementById('viewSongDetail').classList.add('active');
     }
 
-    function closeModal() {
-      document.getElementById('imageModal').classList.remove('active');
-      document.getElementById('modalImg').src = '';
+    function closeSongDetail() {
+      document.getElementById('viewSongDetail').classList.remove('active');
+      const audioListEl = document.getElementById('detailAudioList');
+      audioListEl.querySelectorAll('audio').forEach(a => a.pause());
     }
 
-    document.getElementById('searchInput').addEventListener('input', renderSongs);
+    // PINCH TO ZOOM & ZOOM CONTROLS
+    function zoomSheet(delta) {
+      currentZoom = Math.max(0.8, Math.min(3, currentZoom + delta));
+      document.getElementById('detailSheet').style.transform = `scale(${currentZoom})`;
+    }
 
+    function resetZoom() {
+      currentZoom = 1;
+      document.getElementById('detailSheet').style.transform = 'scale(1)';
+    }
+
+    // Touch events do pinch zoom na telefonie
+    let initialDist = 0;
+    const sheetContainer = document.getElementById('sheetContainer');
+
+    sheetContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        initialDist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+      }
+    });
+
+    sheetContainer.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && initialDist > 0) {
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const factor = dist / initialDist;
+        zoomSheet((factor - 1) * 0.1);
+        initialDist = dist;
+      }
+    });
+
+    // DO NAUKI & ARCHIWUM
+    function toggleNauka(songId) {
+      const index = naukaList.findIndex(s => s.id === songId);
+      if (index > -1) {
+        naukaList.splice(index, 1);
+      } else {
+        const song = allSongs.find(s => s.id === songId);
+        if (song) naukaList.push(song);
+      }
+      localStorage.setItem('naukaList', JSON.stringify(naukaList));
+      updateBadges();
+      renderBaza();
+      renderNauka();
+    }
+
+    function clearNauka() {
+      naukaList = [];
+      localStorage.setItem('naukaList', JSON.stringify([]));
+      updateBadges();
+      renderNauka();
+      renderBaza();
+    }
+
+    function saveNaukaToArchiwum() {
+      if (naukaList.length === 0) return alert('Brak utworów do zapisania!');
+      const name = prompt('Nazwa wydarzenia (np. Niedziela 10:00 / Ślub):');
+      if (!name) return;
+
+      archiwumList.unshift({
+        id: Date.now(),
+        date: new Date().toLocaleDateString('pl-PL'),
+        title: name,
+        songs: [...naukaList]
+      });
+
+      localStorage.setItem('archiwumList', JSON.stringify(archiwumList));
+      alert('Zapisano w archiwum!');
+      renderArchiwum();
+    }
+
+    function renderArchiwum() {
+      const container = document.getElementById('archiwumList');
+      if (archiwumList.length === 0) {
+        container.innerHTML = '<div class="status-msg">Brak zapisanych wydarzeń w archiwum.</div>';
+        return;
+      }
+
+      container.innerHTML = archiwumList.map(item => `
+        <div style="background:var(--card-bg); border:1px solid var(--border-color); padding:16px; border-radius:8px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <strong style="font-family:'Cinzel',serif;">${item.title}</strong>
+            <small style="color:var(--text-muted);">${item.date}</small>
+          </div>
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+            ${item.songs.map(s => s.title).join(' • ')}
+          </div>
+          <button class="btn" onclick="loadArchivedToNauka(${item.id})">Wczytaj do nauki</button>
+        </div>
+      `).join('');
+    }
+
+    function loadArchivedToNauka(id) {
+      const item = archiwumList.find(a => a.id === id);
+      if (item) {
+        naukaList = [...item.songs];
+        localStorage.setItem('naukaList', JSON.stringify(naukaList));
+        updateBadges();
+        switchView('nauka');
+      }
+    }
+
+    function updateBadges() {
+      const count = naukaList.length;
+      document.getElementById('naukaCount').innerText = count;
+      document.getElementById('homeNaukaBadge').innerText = count;
+    }
+
+    // SWITCH TABS
+    function switchView(viewName) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+      if (viewName === 'home') {
+        document.getElementById('viewHome').classList.add('active');
+        document.getElementById('tabHome').classList.add('active');
+      } else if (viewName === 'nauka') {
+        document.getElementById('viewNauka').classList.add('active');
+        document.getElementById('tabNauka').classList.add('active');
+        renderNauka();
+      } else if (viewName === 'baza') {
+        document.getElementById('viewBaza').classList.add('active');
+        document.getElementById('tabBaza').classList.add('active');
+        renderBaza();
+      } else if (viewName === 'archiwum') {
+        document.getElementById('viewArchiwum').classList.add('active');
+        document.getElementById('tabArchiwum').classList.add('active');
+        renderArchiwum();
+      }
+    }
+
+    // START
     loadCatalog();
   </script>
 </body>

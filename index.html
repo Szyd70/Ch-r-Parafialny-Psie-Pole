@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Odtwarzacz Nagrań Chóralnych</title>
+  <title>Śpiewnik Chóralny - Nuty i Głosy</title>
 
   <!-- Cache-Control -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -100,59 +100,143 @@
       border-color: #38bdf8;
     }
 
-    /* Lista audio */
-    .audio-list {
+    /* Lista Pieśni */
+    .song-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 20px;
     }
 
-    .audio-card {
+    .song-card {
       background-color: #141414;
       border: 1px solid #262626;
-      border-radius: 8px;
-      padding: 14px;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .song-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      border-bottom: 1px solid #262626;
+      padding-bottom: 8px;
+    }
+
+    /* Podgląd Nut JPG */
+    .sheet-wrapper {
+      width: 100%;
+      background-color: #000;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #262626;
+      text-align: center;
+    }
+
+    .sheet-img {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    /* Sekcja Głosów / Odtwarzaczy */
+    .audio-section {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      background-color: #0d0d0d;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #222;
     }
 
-    .audio-card-header {
+    .audio-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #a3a3a3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .audio-grid {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
       gap: 8px;
     }
 
-    .audio-title {
-      font-size: 1rem;
+    .audio-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background-color: #141414;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #262626;
+    }
+
+    .voice-label {
+      font-size: 0.75rem;
       font-weight: 700;
-      color: #ffffff;
-      word-break: break-word;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .voice-badge {
       font-size: 0.7rem;
-      font-weight: 700;
-      padding: 3px 8px;
+      padding: 2px 6px;
       border-radius: 4px;
-      text-transform: uppercase;
-      white-space: nowrap;
-      background-color: #1e293b;
-      color: #38bdf8;
-      border: 1px solid #0284c7;
     }
 
-    .voice-badge.sopran { background-color: #312e81; color: #a5b4fc; border-color: #6366f1; }
-    .voice-badge.alt { background-color: #831843; color: #fbcfe8; border-color: #db2777; }
-    .voice-badge.tenor { background-color: #064e3b; color: #a7f3d0; border-color: #059669; }
-    .voice-badge.bas { background-color: #78350f; color: #fde68a; border-color: #d97706; }
+    .voice-tutti { color: #38bdf8; }
+    .voice-sopran { color: #a5b4fc; }
+    .voice-alt { color: #fbcfe8; }
+    .voice-tenor { color: #a7f3d0; }
+    .voice-bas { color: #fde68a; }
 
     audio {
       width: 100%;
-      height: 40px;
-      border-radius: 6px;
+      height: 36px;
       outline: none;
+    }
+
+    /* Modal powiększenia nut */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: rgba(0, 0, 0, 0.95);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+    .modal.active { display: flex; }
+    .modal img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #262626;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
     }
 
     .status-msg {
@@ -167,119 +251,187 @@
 
   <header>
     <div class="header-top">
-      <button class="icon-btn" onclick="loadAudioFiles()">↻ Odśwież</button>
-      <h1>Baza Nagrań</h1>
-      <span style="font-size: 0.8rem; color: #737373;" id="audioCount">0 plików</span>
+      <button class="icon-btn" onclick="loadCatalog()">↻ Odśwież</button>
+      <h1>Śpiewnik Chóralny</h1>
+      <span style="font-size: 0.8rem; color: #737373;" id="songCount">0 pieśni</span>
     </div>
 
     <div class="search-container">
-      <input type="text" id="searchInput" class="search-bar" placeholder="Szukaj nagrania lub głosu..." />
+      <input type="text" id="searchInput" class="search-bar" placeholder="Szukaj pieśni..." />
     </div>
   </header>
 
   <main>
-    <div id="status" class="status-msg">Ładowanie nagrań z Google Drive...</div>
-    <div id="audioList" class="audio-list"></div>
+    <div id="status" class="status-msg">Skandowanie folderów pieśni...</div>
+    <div id="songList" class="song-list"></div>
   </main>
 
+  <!-- Modal do powiększania nut -->
+  <div id="imageModal" class="modal" onclick="closeModal()">
+    <button class="modal-close" onclick="closeModal()">✕ Zamknij</button>
+    <img id="modalImg" src="" alt="Nuty" />
+  </div>
+
   <script>
-    const FOLDER_ID = '1IJI64LxHW4d1fW2f-AtLq-POs0WnY9Mp';
+    const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
     const API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
 
-    let allAudioFiles = [];
+    let allSongs = [];
 
-    async function loadAudioFiles() {
+    async function loadCatalog() {
       const statusEl = document.getElementById('status');
-      const listEl = document.getElementById('audioList');
+      const listEl = document.getElementById('songList');
       statusEl.style.display = 'block';
-      statusEl.innerText = 'Ładowanie nagrań z Google Drive...';
+      statusEl.innerText = 'Ładowanie podfolderów z pieśniami...';
       listEl.innerHTML = '';
 
       const cacheBuster = `&_cb=${Date.now()}`;
-      const query = `'${FOLDER_ID}' in parents and trashed = false and mimeType contains 'audio/'`;
-      const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType)&pageSize=1000&key=${API_KEY}${cacheBuster}`;
-
+      
       try {
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error('Błąd połączenia z Google Drive API');
+        // 1. Pobierz podfoldery (każdy podfolder to osobny utwór)
+        const folderQuery = `'${MAIN_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`;
+        const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${API_KEY}${cacheBuster}`;
 
-        const data = await response.json();
-        const files = data.files || [];
+        const folderRes = await fetch(folderUrl, { cache: 'no-store' });
+        if (!folderRes.ok) throw new Error('Błąd pobierania folderów');
 
-        allAudioFiles = files.map(file => parseAudioFile(file));
-        allAudioFiles.sort((a, b) => a.cleanTitle.localeCompare(b.cleanTitle, 'pl'));
+        const folderData = await folderRes.json();
+        const songFolders = folderData.files || [];
 
-        document.getElementById('audioCount').innerText = `${allAudioFiles.length} nagrań`;
+        allSongs = [];
+
+        // 2. Dla każdego folderu pobierz jego zawartość (obraz nut + pliki audio)
+        for (const folder of songFolders) {
+          const filesQuery = `'${folder.id}' in parents and trashed = false`;
+          const filesUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(filesQuery)}&fields=files(id,name,mimeType)&pageSize=50&key=${API_KEY}${cacheBuster}`;
+
+          const filesRes = await fetch(filesUrl, { cache: 'no-store' });
+          if (filesRes.ok) {
+            const filesData = await filesRes.json();
+            const files = filesData.files || [];
+
+            const songObj = parseSongFolder(folder.name, files);
+            allSongs.push(songObj);
+          }
+        }
+
+        allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
+
+        document.getElementById('songCount').innerText = `${allSongs.length} pieśni`;
         statusEl.style.display = 'none';
-        renderAudioList();
+        renderSongs();
       } catch (err) {
         console.error('Błąd:', err);
-        statusEl.innerText = 'Nie udało się pobrać nagrań. Sprawdź połączenie z siecią.';
+        statusEl.innerText = 'Nie udało się pobrać katalogu pieśni.';
       }
     }
 
-    function parseAudioFile(file) {
-      const rawName = file.name.replace(/\.(m4a|mp3|wav|ogg|aac)$/i, '').trim();
-      const lower = rawName.toLowerCase();
+    function parseSongFolder(folderName, files) {
+      let sheetUrl = null;
+      let audioTracks = {
+        tutti: null,
+        sopran: null,
+        alt: null,
+        tenor: null,
+        bas: null
+      };
 
-      let voiceLabel = 'Tutti / Nagranie';
-      let badgeClass = '';
+      files.forEach(file => {
+        // Obraz nut JPG/PNG
+        if (file.mimeType.includes('image/')) {
+          sheetUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
+        }
 
-      if (lower.includes('sopran') || lower.includes(' (s)')) {
-        voiceLabel = 'Sopran (S)';
-        badgeClass = 'sopran';
-      } else if (lower.includes('alt') || lower.includes(' (a)')) {
-        voiceLabel = 'Alt (A)';
-        badgeClass = 'alt';
-      } else if (lower.includes('tenor') || lower.includes(' (t)')) {
-        voiceLabel = 'Tenor (T)';
-        badgeClass = 'tenor';
-      } else if (lower.includes('bas') || lower.includes(' (b)')) {
-        voiceLabel = 'Bas (B)';
-        badgeClass = 'bas';
-      }
+        // Pliki audio
+        if (file.mimeType.includes('audio/')) {
+          const nameLower = file.name.toLowerCase();
+          const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
 
-      // Bezpośredni strumień danych z Google Drive API v3
-      const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
+          if (nameLower.includes('sopran') || nameLower.includes('- s.')) {
+            audioTracks.sopran = streamUrl;
+          } else if (nameLower.includes('alt') || nameLower.includes('- a.')) {
+            audioTracks.alt = streamUrl;
+          } else if (nameLower.includes('tenor') || nameLower.includes('- t.')) {
+            audioTracks.tenor = streamUrl;
+          } else if (nameLower.includes('bas') || nameLower.includes('- b.')) {
+            audioTracks.bas = streamUrl;
+          } else {
+            audioTracks.tutti = streamUrl;
+          }
+        }
+      });
 
       return {
-        id: file.id,
-        fullName: file.name,
-        cleanTitle: rawName,
-        voiceLabel: voiceLabel,
-        badgeClass: badgeClass,
-        streamUrl: streamUrl
+        title: folderName,
+        sheetUrl: sheetUrl,
+        audioTracks: audioTracks
       };
     }
 
-    function renderAudioList() {
-      const container = document.getElementById('audioList');
+    function renderSongs() {
+      const container = document.getElementById('songList');
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-      const filtered = allAudioFiles.filter(item => 
-        item.cleanTitle.toLowerCase().includes(searchTerm) ||
-        item.voiceLabel.toLowerCase().includes(searchTerm)
-      );
+      const filtered = allSongs.filter(song => song.title.toLowerCase().includes(searchTerm));
 
       if (filtered.length === 0) {
-        container.innerHTML = '<div class="status-msg">Brak nagrań spełniających kryteria.</div>';
+        container.innerHTML = '<div class="status-msg">Brak pieśni spełniających kryteria.</div>';
         return;
       }
 
-      container.innerHTML = filtered.map(item => `
-        <div class="audio-card">
-          <div class="audio-card-header">
-            <div class="audio-title">${item.cleanTitle}</div>
-            <span class="voice-badge ${item.badgeClass}">${item.voiceLabel}</span>
+      container.innerHTML = filtered.map(song => {
+        const { tutti, sopran, alt, tenor, bas } = song.audioTracks;
+        const hasAudio = tutti || sopran || alt || tenor || bas;
+
+        return `
+          <div class="song-card">
+            <div class="song-title">${song.title}</div>
+
+            ${song.sheetUrl ? `
+              <div class="sheet-wrapper">
+                <img class="sheet-img" src="${song.sheetUrl}" alt="Nuty ${song.title}" onclick="openModal('${song.sheetUrl}')" loading="lazy" />
+              </div>
+            ` : '<div style="color:#666; font-size:0.85rem;">Brak dołączonych nut (JPG)</div>'}
+
+            ${hasAudio ? `
+              <div class="audio-section">
+                <div class="audio-section-title">Odtwarzacze głosów:</div>
+                <div class="audio-grid">
+                  ${tutti ? renderAudioRow('Tutti / Nagranie', 'voice-tutti', tutti) : ''}
+                  ${sopran ? renderAudioRow('Sopran (S)', 'voice-sopran', sopran) : ''}
+                  ${alt ? renderAudioRow('Alt (A)', 'voice-alt', alt) : ''}
+                  ${tenor ? renderAudioRow('Tenor (T)', 'voice-tenor', tenor) : ''}
+                  ${bas ? renderAudioRow('Bas (B)', 'voice-bas', bas) : ''}
+                </div>
+              </div>
+            ` : ''}
           </div>
-          <audio controls crossorigin="anonymous" preload="metadata" src="${item.streamUrl}"></audio>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    document.getElementById('searchInput').addEventListener('input', renderAudioList);
+    function renderAudioRow(label, cssClass, url) {
+      return `
+        <div class="audio-row">
+          <div class="voice-label ${cssClass}">${label}</div>
+          <audio controls crossorigin="anonymous" preload="metadata" src="${url}"></audio>
+        </div>
+      `;
+    }
 
-    loadAudioFiles();
+    function openModal(url) {
+      document.getElementById('modalImg').src = url;
+      document.getElementById('imageModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('imageModal').classList.remove('active');
+      document.getElementById('modalImg').src = '';
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderSongs);
+
+    loadCatalog();
   </script>
 </body>
 </html>

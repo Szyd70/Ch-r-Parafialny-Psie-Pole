@@ -10,6 +10,10 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
+  <!-- PWA Setup -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
   <meta name="theme-color" content="#0a0a0a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
 
@@ -58,7 +62,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     h1.main-title {
@@ -103,7 +107,6 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 6px 12px;
-      margin-bottom: 12px;
       font-size: 0.82rem;
     }
 
@@ -117,39 +120,24 @@
       outline: none;
     }
 
-    /* NAV TABS */
-    .nav-tabs {
-      display: flex;
-      gap: 6px;
-      background-color: var(--card-bg);
-      padding: 4px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
-    .tab-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      padding: 8px 4px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .tab-btn.active {
-      background-color: var(--border-color);
-      color: var(--text-main);
-    }
-
     /* LAYOUT VIEWS */
     main { padding: 16px; }
     .view-section { display: none; }
     .view-section.active { display: block; }
+
+    .section-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+    }
 
     /* DASHBOARD HERO */
     .hero-card {
@@ -168,7 +156,6 @@
     .hero-card p {
       font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 16px;
     }
 
     .blocks-grid {
@@ -258,7 +245,7 @@
     }
     .song-title-lg {
       font-family: 'Cinzel', serif;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 800;
       letter-spacing: 1.5px;
       text-transform: uppercase;
@@ -313,13 +300,6 @@
       border-radius: 8px;
       padding: 14px;
     }
-    .audio-box h4 {
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-    }
     .audio-track {
       margin-bottom: 10px;
     }
@@ -372,25 +352,16 @@
         <option value="BAS">Bas (B)</option>
       </select>
     </div>
-
-    <!-- TABS -->
-    <div class="nav-tabs">
-      <button class="tab-btn active" id="tabHome" onclick="switchView('home')">Główna</button>
-      <button class="tab-btn" id="tabNauka" onclick="switchView('nauka')">Do nauki (<span id="naukaCount">0</span>)</button>
-      <button class="tab-btn" id="tabBaza" onclick="switchView('baza')">Baza Utworów</button>
-      <button class="tab-btn" id="tabArchiwum" onclick="switchView('archiwum')">Archiwum</button>
-    </div>
   </header>
 
   <main>
     <div id="status" class="status-msg">Ładowanie bazy utworów z Google Drive...</div>
 
-    <!-- 1. STRONA GŁÓWNA -->
+    <!-- 1. STRONA GŁÓWNA (NAWIGACJA BLOKAMI) -->
     <div id="viewHome" class="view-section active">
       <div class="hero-card">
         <h2>Laudate Dominum</h2>
         <p>Aplikacja do nauki partii głosowych i zarządzania repertuarem</p>
-        <button class="btn btn-primary" onclick="switchView('nauka')">Otwórz "Do nauki"</button>
       </div>
 
       <div class="blocks-grid">
@@ -411,6 +382,11 @@
 
     <!-- 2. DO NAUKI -->
     <div id="viewNauka" class="view-section">
+      <div class="section-header-bar">
+        <button class="btn" onclick="switchView('home')">← Powrót do Strony Główna</button>
+        <h2 class="section-title">Do Nauki</h2>
+      </div>
+
       <div style="display:flex; gap:10px; margin-bottom:14px;">
         <button class="btn" style="flex:1;" onclick="clearNauka()">Wyczyść zestaw</button>
         <button class="btn btn-primary" style="flex:1;" onclick="saveNaukaToArchiwum()">💾 Zapisz do Archiwum</button>
@@ -420,12 +396,22 @@
 
     <!-- 3. BAZA UTWORÓW -->
     <div id="viewBaza" class="view-section">
+      <div class="section-header-bar">
+        <button class="btn" onclick="switchView('home')">← Powrót do Strony Główna</button>
+        <h2 class="section-title">Baza Utworów</h2>
+      </div>
+
       <input type="text" id="searchInput" class="search-box" placeholder="Szukaj utworu..." oninput="renderBaza()" />
       <div id="bazaList" class="song-grid"></div>
     </div>
 
     <!-- 4. ARCHIWUM WYDARZEŃ -->
     <div id="viewArchiwum" class="view-section">
+      <div class="section-header-bar">
+        <button class="btn" onclick="switchView('home')">← Powrót do Strony Główna</button>
+        <h2 class="section-title">Archiwum</h2>
+      </div>
+
       <div id="archiwumList"></div>
     </div>
   </main>
@@ -450,7 +436,7 @@
 
     <!-- AUDIO -->
     <div id="detailAudioSection" class="audio-box" style="display:none;">
-      <h4>Nagrania pomocnicze:</h4>
+      <h4 style="font-size:0.8rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Nagrania pomocnicze:</h4>
       <div id="detailAudioList"></div>
     </div>
 
@@ -778,35 +764,47 @@
 
     function updateBadges() {
       const count = naukaList.length;
-      document.getElementById('naukaCount').innerText = count;
       document.getElementById('homeNaukaBadge').innerText = count;
     }
 
     // SWITCH TABS
     function switchView(viewName) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
       if (viewName === 'home') {
         document.getElementById('viewHome').classList.add('active');
-        document.getElementById('tabHome').classList.add('active');
       } else if (viewName === 'nauka') {
         document.getElementById('viewNauka').classList.add('active');
-        document.getElementById('tabNauka').classList.add('active');
         renderNauka();
       } else if (viewName === 'baza') {
         document.getElementById('viewBaza').classList.add('active');
-        document.getElementById('tabBaza').classList.add('active');
         renderBaza();
       } else if (viewName === 'archiwum') {
         document.getElementById('viewArchiwum').classList.add('active');
-        document.getElementById('tabArchiwum').classList.add('active');
         renderArchiwum();
       }
     }
 
     // START
     loadCatalog();
+  </script>
+
+  <!-- REGISTRACJA SERVICE WORKERA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js?v=' + Date.now()).then((reg) => {
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                window.location.reload();
+              }
+            };
+          };
+        }).catch((err) => console.error('Błąd SW:', err));
+      });
+    }
   </script>
 </body>
 </html>

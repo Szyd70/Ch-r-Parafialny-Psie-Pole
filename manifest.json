@@ -2,11 +2,10 @@
   "short_name": "Chór Psie Pole",
   "name": "Okazjonalny Chór Psie Pole",
   "icons": [
-,
     {
       "src": "icon.svg",
-      "type": "image/png",
-      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "sizes": "any",
       "purpose": "any maskable"
     }
   ],

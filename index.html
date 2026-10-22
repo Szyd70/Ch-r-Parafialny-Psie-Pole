@@ -294,7 +294,7 @@
       color: var(--text-muted);
     }
 
-    /* FORMULARZ KALENDARZA (MODAL/BOX) */
+    /* FORMULARZ KALENDARZA */
     .event-form-card {
       background: #fff;
       border: 1px solid #777;
@@ -523,17 +523,22 @@
           <button class="btn btn-primary" style="width:100%;" onclick="toggleCalendarForm()">+ Dodaj wydarzenie / cykl</button>
           
           <div id="calendarFormCard" class="event-form-card" style="display:none; margin-top:10px;">
-            <strong>Nowe wydarzenie:</strong>
+            <strong>Nowe wydarzenie / spotkanie:</strong>
             <input type="text" id="evTitle" placeholder="Tytuł (np. Próba chóru)" />
-            <input type="time" id="evTime" value="19:00" />
-            <input type="date" id="evStartDate" />
+            <div style="display:flex; gap:6px;">
+              <input type="date" id="evStartDate" style="flex:1;" />
+              <input type="time" id="evTime" value="19:00" style="width:90px;" />
+            </div>
+            
+            <label style="font-size:0.8rem; font-weight:700; color:#444; margin-top:2px;">Powtarzalność:</label>
             <select id="evRecurrence">
               <option value="NONE">Jednorazowo</option>
-              <option value="WEEKLY">Co tydzień</option>
-              <option value="BIWEEKLY">Co 2 tygodnie</option>
-              <option value="LAST_FRIDAY">Ostatni piątek miesiąca</option>
-              <option value="LAST_DAY">Ostatni dzień miesiąca</option>
+              <option value="1">Co tydzień</option>
+              <option value="2">Co 2 tygodnie</option>
+              <option value="3">Co 3 tygodnie</option>
+              <option value="4">Co 4 tygodnie</option>
             </select>
+
             <input type="text" id="evDesc" placeholder="Miejsce / Uwagi (np. Sala parafialna)" />
             <button class="btn btn-primary" onclick="addAdvancedCalendarEvent()">Zapisz w kalendarzu</button>
           </div>
@@ -594,8 +599,6 @@
     let naukaList = JSON.parse(localStorage.getItem('naukaList')) || [];
     let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
     let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
-    
-    // KALENDARZ Z ZAWIERANIEM WYDARZEŃ SFORMATOWANYCH PO DATACCH
     let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
 
     let currentUserVoice = localStorage.getItem('userVoice') || 'NONE';
@@ -609,7 +612,6 @@
         document.getElementById('announcementsContent').innerText = savedAnn;
       }
       
-      // Ustawienie dzisiejszej daty w formularzu kalendarza
       const todayStr = new Date().toISOString().split('T')[0];
       const startDateInput = document.getElementById('evStartDate');
       if (startDateInput) startDateInput.value = todayStr;
@@ -665,7 +667,7 @@
       }
     }
 
-    // --- LOGIKA KALENDARZA ---
+    // --- ELASTYCZNY KALENDARZ CYKLICZNY ---
     function toggleCalendarForm() {
       const card = document.getElementById('calendarFormCard');
       card.style.display = card.style.display === 'none' ? 'flex' : 'none';
@@ -676,23 +678,35 @@
       const title = document.getElementById('evTitle').value.trim();
       const time = document.getElementById('evTime').value;
       const startDateStr = document.getElementById('evStartDate').value;
-      const recurrence = document.getElementById('evRecurrence').value;
+      const recurrenceWeeks = document.getElementById('evRecurrence').value; // 'NONE' lub liczba tygodni ('1', '2', '3'...)
       const desc = document.getElementById('evDesc').value.trim();
 
       if (!title || !startDateStr) {
-        return alert('Wpisz tytuł oraz wybierz datę!');
+        return alert('Wpisz tytuł oraz wybierz datę startową!');
       }
 
-      const generated = generateDates(startDateStr, recurrence, 6); // generuj do 6 powtórzeń do przodu
+      let generatedDates = [];
+      let currentDate = new Date(startDateStr);
 
-      generated.forEach(dStr => {
+      if (recurrenceWeeks === 'NONE') {
+        generatedDates.push(startDateStr);
+      } else {
+        const weeksInterval = parseInt(recurrenceWeeks, 10);
+        // Generujemy automatycznie np. 8 wystąpień do przodu w wybranym interwale tygodniowym
+        for (let i = 0; i < 8; i++) {
+          let d = new Date(currentDate);
+          d.setDate(d.getDate() + (i * weeksInterval * 7));
+          generatedDates.push(d.toISOString().split('T')[0]);
+        }
+      }
+
+      generatedDates.forEach(dStr => {
         calendarEvents.push({
           id: Date.now() + Math.random(),
           title,
-          dateStr: dStr, // format YYYY-MM-DD
+          dateStr: dStr,
           time,
-          desc,
-          recurrence
+          desc
         });
       });
 
@@ -701,53 +715,10 @@
       renderCalendar();
     }
 
-    function generateDates(startStr, recurrence, count) {
-      const results = [];
-      let current = new Date(startStr);
-
-      if (recurrence === 'NONE') {
-        results.push(startStr);
-        return results;
-      }
-
-      for (let i = 0; i < count; i++) {
-        if (recurrence === 'WEEKLY') {
-          let d = new Date(current);
-          d.setDate(d.getDate() + i * 7);
-          results.push(d.toISOString().split('T')[0]);
-        } else if (recurrence === 'BIWEEKLY') {
-          let d = new Date(current);
-          d.setDate(d.getDate() + i * 14);
-          results.push(d.toISOString().split('T')[0]);
-        } else if (recurrence === 'LAST_FRIDAY') {
-          let year = current.getFullYear();
-          let month = current.getMonth() + i;
-          let lastFriday = getLastFridayOfMonth(year, month);
-          results.push(lastFriday.toISOString().split('T')[0]);
-        } else if (recurrence === 'LAST_DAY') {
-          let year = current.getFullYear();
-          let month = current.getMonth() + i;
-          let lastDay = new Date(year, month + 1, 0);
-          results.push(lastDay.toISOString().split('T')[0]);
-        }
-      }
-
-      return results;
-    }
-
-    function getLastFridayOfMonth(year, month) {
-      let lastDay = new Date(year, month + 1, 0);
-      while (lastDay.getDay() !== 5) { // 5 = Piątek
-        lastDay.setDate(lastDay.getDate() - 1);
-      }
-      return lastDay;
-    }
-
     function renderCalendar() {
       const container = document.getElementById('calendarList');
       const todayStr = new Date().toISOString().split('T')[0];
 
-      // Filtruj wydarzenia z przeszłości oraz sortuj po dacie
       let sortedEvents = calendarEvents
         .filter(ev => ev.dateStr >= todayStr)
         .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
@@ -885,7 +856,7 @@
       }
     }
 
-    // RENDERING WIDOKÓW REPERTUARU I BAZY
+    // RENDERING WIDOKÓW
     function renderRepertuar() {
       const container = document.getElementById('repertuarList');
       const searchEl = document.getElementById('searchRepertuarInput');

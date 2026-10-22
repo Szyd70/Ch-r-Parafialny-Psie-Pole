@@ -294,6 +294,26 @@
       color: var(--text-muted);
     }
 
+    /* FORMULARZ KALENDARZA (MODAL/BOX) */
+    .event-form-card {
+      background: #fff;
+      border: 1px solid #777;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .event-form-card input, .event-form-card select {
+      padding: 8px;
+      border: 1px solid #888;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
     /* SONG PAGE (FULLSCREEN SUBPAGE) */
     #viewSongDetail {
       position: fixed;
@@ -409,7 +429,6 @@
 
   <div class="app-container">
     <header>
-      <!-- PRZYCISKI WYBORU GŁOSU / ADMINA -->
       <div class="voice-buttons-bar">
         <button class="voice-btn admin-btn" data-voice="ADMIN" onclick="selectVoice('ADMIN')">ADMIN 🔒</button>
         <button class="voice-btn" data-voice="SOPRAN" onclick="selectVoice('SOPRAN')">SOPRAN</button>
@@ -418,7 +437,6 @@
         <button class="voice-btn" data-voice="BAS" onclick="selectVoice('BAS')">BAS</button>
       </div>
 
-      <!-- NAGŁÓWEK TYTUŁOWY -->
       <div class="header-titles">
         <h1 class="main-title-lg">Chór Parafii Św. Jakuba i Krzysztofa</h1>
         <h2 class="sub-title-md">Wrocław Psie Pole</h2>
@@ -431,7 +449,6 @@
 
       <!-- 1. STRONA GŁÓWNA -->
       <div id="viewHome" class="view-section active">
-        <!-- 5 IKON NAWIGACYJNYCH -->
         <div class="tiles-grid">
           <div class="tile-card" onclick="switchView('repertuar')" title="Bieżący repertuar">
             <span class="tile-icon">🎼</span>
@@ -450,7 +467,6 @@
           </div>
         </div>
 
-        <!-- DUŻY BLOK OGŁOSZENIA -->
         <div class="announcements-box">
           <div class="announcements-title">OGŁOSZENIA</div>
           <div class="announcements-content" id="announcementsContent">
@@ -504,8 +520,25 @@
         </div>
         
         <div id="adminCalendarControls" style="display:none; margin-bottom:14px;">
-          <button class="btn btn-primary" style="width:100%;" onclick="addCalendarEvent()">+ Dodaj wydarzenie / próbę</button>
+          <button class="btn btn-primary" style="width:100%;" onclick="toggleCalendarForm()">+ Dodaj wydarzenie / cykl</button>
+          
+          <div id="calendarFormCard" class="event-form-card" style="display:none; margin-top:10px;">
+            <strong>Nowe wydarzenie:</strong>
+            <input type="text" id="evTitle" placeholder="Tytuł (np. Próba chóru)" />
+            <input type="time" id="evTime" value="19:00" />
+            <input type="date" id="evStartDate" />
+            <select id="evRecurrence">
+              <option value="NONE">Jednorazowo</option>
+              <option value="WEEKLY">Co tydzień</option>
+              <option value="BIWEEKLY">Co 2 tygodnie</option>
+              <option value="LAST_FRIDAY">Ostatni piątek miesiąca</option>
+              <option value="LAST_DAY">Ostatni dzień miesiąca</option>
+            </select>
+            <input type="text" id="evDesc" placeholder="Miejsce / Uwagi (np. Sala parafialna)" />
+            <button class="btn btn-primary" onclick="addAdvancedCalendarEvent()">Zapisz w kalendarzu</button>
+          </div>
         </div>
+
         <div id="calendarList"></div>
       </div>
 
@@ -521,7 +554,7 @@
     </main>
   </div>
 
-  <!-- PODSTRONA UTWORU (FULLSCREEN PAGE) -->
+  <!-- PODSTRONA UTWORU -->
   <div id="viewSongDetail">
     <div class="song-detail-header">
       <button class="btn" onclick="closeSongDetail()">← Powrót</button>
@@ -532,7 +565,6 @@
       </div>
     </div>
 
-    <!-- NUTY Z PINCH-ZOOM -->
     <div class="sheet-container" id="sheetContainer">
       <img id="detailSheet" class="sheet-img" src="" alt="Nuty" />
       <div class="zoom-controls">
@@ -542,13 +574,11 @@
       </div>
     </div>
 
-    <!-- AUDIO -->
     <div id="detailAudioSection" class="audio-box" style="display:none;">
       <h4 style="font-size:0.8rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Nagrania pomocnicze:</h4>
       <div id="detailAudioList"></div>
     </div>
 
-    <!-- TEKST UTWORU -->
     <div style="position:relative;">
       <div id="detailLyricsSection" class="lyrics-box" style="display:none;"></div>
       <button class="btn" id="editLyricsBtn" style="position:absolute; top:8px; right:8px; display:none; font-size:0.7rem;" onclick="editSongLyrics()">✏️ Edytuj tekst</button>
@@ -564,10 +594,9 @@
     let naukaList = JSON.parse(localStorage.getItem('naukaList')) || [];
     let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
     let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
-    let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [
-      { id: 1, title: 'Próba chóru', date: 'Każdy czwartek, godz. 19:00', desc: 'Sala parafialna' },
-      { id: 2, title: 'Oprawa Mszy Św.', date: 'Niedziela, godz. 10:00', desc: 'Kościół św. Jakuba i Krzysztofa' }
-    ];
+    
+    // KALENDARZ Z ZAWIERANIEM WYDARZEŃ SFORMATOWANYCH PO DATACCH
+    let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
 
     let currentUserVoice = localStorage.getItem('userVoice') || 'NONE';
     let isAdmin = false;
@@ -579,10 +608,15 @@
       if (savedAnn) {
         document.getElementById('announcementsContent').innerText = savedAnn;
       }
+      
+      // Ustawienie dzisiejszej daty w formularzu kalendarza
+      const todayStr = new Date().toISOString().split('T')[0];
+      const startDateInput = document.getElementById('evStartDate');
+      if (startDateInput) startDateInput.value = todayStr;
+
       selectVoice(currentUserVoice, false);
     }
 
-    // TOGGLE SELEKCJI GŁOSU (ODZNACZANIE PO PONOWNYM KLIKNIĘCIU)
     function selectVoice(voice, save = true) {
       if (voice === 'ADMIN' && !isAdmin) {
         const pass = prompt('Podaj hasło administratora:');
@@ -595,7 +629,6 @@
         }
       }
 
-      // Odznaczanie, jeśli kliknięto w aktywny głos
       if (currentUserVoice === voice && voice !== 'ADMIN') {
         currentUserVoice = 'NONE';
       } else {
@@ -632,36 +665,120 @@
       }
     }
 
-    // KALENDARZ
+    // --- LOGIKA KALENDARZA ---
+    function toggleCalendarForm() {
+      const card = document.getElementById('calendarFormCard');
+      card.style.display = card.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function addAdvancedCalendarEvent() {
+      if (!isAdmin) return;
+      const title = document.getElementById('evTitle').value.trim();
+      const time = document.getElementById('evTime').value;
+      const startDateStr = document.getElementById('evStartDate').value;
+      const recurrence = document.getElementById('evRecurrence').value;
+      const desc = document.getElementById('evDesc').value.trim();
+
+      if (!title || !startDateStr) {
+        return alert('Wpisz tytuł oraz wybierz datę!');
+      }
+
+      const generated = generateDates(startDateStr, recurrence, 6); // generuj do 6 powtórzeń do przodu
+
+      generated.forEach(dStr => {
+        calendarEvents.push({
+          id: Date.now() + Math.random(),
+          title,
+          dateStr: dStr, // format YYYY-MM-DD
+          time,
+          desc,
+          recurrence
+        });
+      });
+
+      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
+      toggleCalendarForm();
+      renderCalendar();
+    }
+
+    function generateDates(startStr, recurrence, count) {
+      const results = [];
+      let current = new Date(startStr);
+
+      if (recurrence === 'NONE') {
+        results.push(startStr);
+        return results;
+      }
+
+      for (let i = 0; i < count; i++) {
+        if (recurrence === 'WEEKLY') {
+          let d = new Date(current);
+          d.setDate(d.getDate() + i * 7);
+          results.push(d.toISOString().split('T')[0]);
+        } else if (recurrence === 'BIWEEKLY') {
+          let d = new Date(current);
+          d.setDate(d.getDate() + i * 14);
+          results.push(d.toISOString().split('T')[0]);
+        } else if (recurrence === 'LAST_FRIDAY') {
+          let year = current.getFullYear();
+          let month = current.getMonth() + i;
+          let lastFriday = getLastFridayOfMonth(year, month);
+          results.push(lastFriday.toISOString().split('T')[0]);
+        } else if (recurrence === 'LAST_DAY') {
+          let year = current.getFullYear();
+          let month = current.getMonth() + i;
+          let lastDay = new Date(year, month + 1, 0);
+          results.push(lastDay.toISOString().split('T')[0]);
+        }
+      }
+
+      return results;
+    }
+
+    function getLastFridayOfMonth(year, month) {
+      let lastDay = new Date(year, month + 1, 0);
+      while (lastDay.getDay() !== 5) { // 5 = Piątek
+        lastDay.setDate(lastDay.getDate() - 1);
+      }
+      return lastDay;
+    }
+
     function renderCalendar() {
       const container = document.getElementById('calendarList');
-      if (calendarEvents.length === 0) {
-        container.innerHTML = '<div class="status-msg">Brak zaplanowanych spotkań.</div>';
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Filtruj wydarzenia z przeszłości oraz sortuj po dacie
+      let sortedEvents = calendarEvents
+        .filter(ev => ev.dateStr >= todayStr)
+        .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+
+      if (sortedEvents.length === 0) {
+        container.innerHTML = '<div class="status-msg">Brak nadchodzących wydarzeń.</div>';
         return;
       }
 
-      container.innerHTML = calendarEvents.map(ev => `
-        <div style="background:#fff; border:1px solid #777; padding:14px; border-radius:8px; margin-bottom:10px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <strong style="font-size:0.95rem;">${ev.title}</strong>
-            <small style="color:var(--text-muted);">${ev.date}</small>
+      container.innerHTML = sortedEvents.map(ev => {
+        const formattedDate = new Date(ev.dateStr).toLocaleDateString('pl-PL', {
+          weekday: 'short',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+
+        return `
+          <div style="background:#fff; border:1px solid #777; padding:12px 14px; border-radius:8px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <strong style="font-size:0.95rem;">${ev.title}</strong>
+              <span style="font-size:0.8rem; font-weight:700; background:#eee; padding:2px 6px; border-radius:4px;">${ev.time || ''}</span>
+            </div>
+            <div style="font-size:0.82rem; color:#222; font-weight:600; margin-bottom:4px;">
+              📅 ${formattedDate}
+            </div>
+            <div style="font-size:0.8rem; color:#555;">${ev.desc || ''}</div>
+            ${isAdmin ? `<button class="btn" style="margin-top:8px; font-size:0.68rem; color:darkred; padding:3px 8px;" onclick="deleteCalendarEvent(${ev.id})">Usuń</button>` : ''}
           </div>
-          <div style="font-size:0.85rem; color:#444;">${ev.desc}</div>
-          ${isAdmin ? `<button class="btn" style="margin-top:8px; font-size:0.7rem; color:darkred;" onclick="deleteCalendarEvent(${ev.id})">Usuń wydarzenie</button>` : ''}
-        </div>
-      `).join('');
-    }
-
-    function addCalendarEvent() {
-      if (!isAdmin) return;
-      const title = prompt('Nazwa wydarzenia / spotkania:');
-      if (!title) return;
-      const date = prompt('Termin (np. 15.11.2026 / Co wtorek):');
-      const desc = prompt('Opis / Miejsce:');
-
-      calendarEvents.push({ id: Date.now(), title, date: date || '', desc: desc || '' });
-      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
-      renderCalendar();
+        `;
+      }).join('');
     }
 
     function deleteCalendarEvent(id) {
@@ -768,7 +885,7 @@
       }
     }
 
-    // RENDERING WIDOKÓW
+    // RENDERING WIDOKÓW REPERTUARU I BAZY
     function renderRepertuar() {
       const container = document.getElementById('repertuarList');
       const searchEl = document.getElementById('searchRepertuarInput');
@@ -830,7 +947,6 @@
 
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
 
-      // Nuty
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {
         sheetImg.src = song.sheetUrl;
@@ -840,7 +956,6 @@
       }
       resetZoom();
 
-      // Audio - Pokazuje wszystkie ścieżki dla NONE i ADMIN, lub wybraną dla głosu
       const audioSec = document.getElementById('detailAudioSection');
       const audioListEl = document.getElementById('detailAudioList');
 
@@ -861,7 +976,6 @@
         audioSec.style.display = 'none';
       }
 
-      // Tekst
       const lyricsSec = document.getElementById('detailLyricsSection');
       const editLyricsBtn = document.getElementById('editLyricsBtn');
       const activeLyrics = customLyrics[songId] || song.lyricsText;
@@ -876,7 +990,6 @@
 
       editLyricsBtn.style.display = isAdmin ? 'inline-block' : 'none';
 
-      // Przyciski zarządzania dla Admina
       const repBtn = document.getElementById('detailRepertuarBtn');
       const naukaBtn = document.getElementById('detailNaukaBtn');
 
@@ -917,7 +1030,7 @@
       }
     }
 
-    // PINCH TO ZOOM & ZOOM CONTROLS
+    // PINCH TO ZOOM
     function zoomSheet(delta) {
       currentZoom = Math.max(0.8, Math.min(3, currentZoom + delta));
       document.getElementById('detailSheet').style.transform = `scale(${currentZoom})`;

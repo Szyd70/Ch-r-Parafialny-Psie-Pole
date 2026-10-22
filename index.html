@@ -22,6 +22,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- Firebase SDK (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --bg-color: #f1f1f1;
@@ -649,33 +653,88 @@
     </div>
   </div>
 
+  <!-- Firebase SDK (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <script>
     const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
     const API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
 
-    let allSongs = [];
-    let repertuarList = JSON.parse(localStorage.getItem('repertuarList')) || [];
-    let naukaAssignments = JSON.parse(localStorage.getItem('naukaAssignments')) || [];
-    let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
-    let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
-    let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
+    // Konfiguracja Firebase Realtime Database
+    const firebaseConfig = {
+      apiKey: API_KEY,
+      authDomain: "spiewnik-chor.firebaseapp.com",
+      databaseURL: "https://spiewnik-chor-default-rtdb.firebaseio.com",
+      projectId: "spiewnik-chor",
+      storageBucket: "spiewnik-chor.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
 
-    // Domyślnie uruchamiamy aplikację jako zwykły użytkownik (bez autostartu hasła admina)
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    let allSongs = [];
+    let repertuarList = [];
+    let naukaAssignments = [];
+    let archiwumList = [];
+    let customLyrics = {};
+    let calendarEvents = [];
+
     let currentUserVoice = localStorage.getItem('userVoice') || 'NONE';
     let isAdmin = false;
     let currentZoom = 1;
     let currentSongId = null;
 
+    // --- SYNCHRONIZACJA Z FIREBASE W CZASIE RZECZYWISTYM ---
+    function setupCloudSync() {
+      // 1. Ogłoszenia
+      db.ref('announcementsText').on('value', (snapshot) => {
+        if (snapshot.exists()) {
+          document.getElementById('announcementsContent').innerText = snapshot.val();
+        }
+      });
+
+      // 2. Bieżący Repertuar
+      db.ref('repertuarList').on('value', (snapshot) => {
+        repertuarList = snapshot.val() || [];
+        renderRepertuar();
+      });
+
+      // 3. Do Nauki
+      db.ref('naukaAssignments').on('value', (snapshot) => {
+        naukaAssignments = snapshot.val() || [];
+        renderNauka();
+      });
+
+      // 4. Kalendarz
+      db.ref('calendarEvents').on('value', (snapshot) => {
+        calendarEvents = snapshot.val() || [];
+        renderCalendar();
+      });
+
+      // 5. Archiwum
+      db.ref('archiwumList').on('value', (snapshot) => {
+        archiwumList = snapshot.val() || [];
+        renderArchiwum();
+      });
+
+      // 6. Teksty pieśni
+      db.ref('customLyrics').on('value', (snapshot) => {
+        customLyrics = snapshot.val() || {};
+        if (currentSongId) openSongDetail(currentSongId);
+      });
+    }
+
     function initApp() {
-      const savedAnn = localStorage.getItem('announcementsText');
-      if (savedAnn) {
-        document.getElementById('announcementsContent').innerText = savedAnn;
-      }
-      
       const todayStr = new Date().toISOString().split('T')[0];
       const startDateInput = document.getElementById('evStartDate');
       if (startDateInput) startDateInput.value = todayStr;
 
+      setupCloudSync();
       selectVoice(currentUserVoice, false);
     }
 
@@ -688,10 +747,9 @@
             alert('Zalogowano jako Administrator.');
           } else {
             if (pass !== null) alert('Nieprawidłowe hasło!');
-            return; // Przerwano, nie zmieniamy aktywnego przycisku ani trybu
+            return;
           }
         } else {
-          // Jeśli admin był już zalogowany, ponowne kliknięcie w ADMIN wylogowuje go z powrotem do trybu zwykłego użytkownika
           isAdmin = false;
           currentUserVoice = 'NONE';
           if (save) localStorage.setItem('userVoice', currentUserVoice);
@@ -714,11 +772,9 @@
       document.querySelectorAll('.voice-btn').forEach(btn => {
         const vAttr = btn.getAttribute('data-voice');
         if (vAttr === 'ADMIN') {
-          if (isAdmin) btn.classList.add('active');
-          else btn.classList.remove('active');
+          btn.classList.toggle('active', isAdmin);
         } else {
-          if (vAttr === currentUserVoice) btn.classList.add('active');
-          else btn.classList.remove('active');
+          btn.classList.toggle('active', vAttr === currentUserVoice);
         }
       });
 
@@ -744,8 +800,7 @@
       const current = document.getElementById('announcementsContent').innerText;
       const newText = prompt('Wpisz treść ogłoszenia:', current);
       if (newText !== null) {
-        document.getElementById('announcementsContent').innerText = newText;
-        localStorage.setItem('announcementsText', newText);
+        db.ref('announcementsText').set(newText);
       }
     }
 
@@ -791,9 +846,8 @@
         });
       });
 
-      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
+      db.ref('calendarEvents').set(calendarEvents);
       toggleCalendarForm();
-      renderCalendar();
     }
 
     function getUpcomingCalendarEvents() {
@@ -839,8 +893,7 @@
     function deleteCalendarEvent(id) {
       if (!isAdmin) return;
       calendarEvents = calendarEvents.filter(e => e.id !== id);
-      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
-      renderCalendar();
+      db.ref('calendarEvents').set(calendarEvents);
     }
 
     // POBIERANIE KATALOGU Z GOOGLE DRIVE
@@ -876,9 +929,10 @@
 
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
 
-        if (repertuarList.length === 0) {
+        // Jeśli repertuar w chmurze jest pusty przy pierwszym uruchomieniu, zainicjalizuj go całą bazą
+        if (repertuarList.length === 0 && isAdmin) {
           repertuarList = [...allSongs];
-          localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
+          db.ref('repertuarList').set(repertuarList);
         }
 
         statusEl.style.display = 'none';
@@ -1093,11 +1147,13 @@
     function editSongLyrics() {
       if (!isAdmin || !currentSongId) return;
       const currentText = customLyrics[currentSongId] || '';
-      const newText = prompt('Wpisz lub edytuj tekst pieśni:', currentText);
+      const newText = prompt('Wpisz lub edytuj tekst pieśni (zostaw puste, aby usunąć):', currentText);
       if (newText !== null) {
-        customLyrics[currentSongId] = newText;
-        localStorage.setItem('customLyrics', JSON.stringify(customLyrics));
-        openSongDetail(currentSongId);
+        if (newText.trim() === '') {
+          db.ref(`customLyrics/${currentSongId}`).remove();
+        } else {
+          db.ref(`customLyrics/${currentSongId}`).set(newText);
+        }
       }
     }
 
@@ -1136,7 +1192,7 @@
       }
     });
 
-    // ZARZĄDZANIE REPERTUAREM
+    // ZARZĄDZANIE REPERTUAREM (FIREBASE)
     function toggleRepertuar(songId) {
       if (!isAdmin) return;
       const index = repertuarList.findIndex(s => s.id === songId);
@@ -1146,15 +1202,12 @@
         const song = allSongs.find(s => s.id === songId);
         if (song) repertuarList.push(song);
       }
-      localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
-      renderRepertuar();
+      db.ref('repertuarList').set(repertuarList);
     }
 
     function clearRepertuar() {
       if (!isAdmin) return;
-      repertuarList = [];
-      localStorage.setItem('repertuarList', JSON.stringify([]));
-      renderRepertuar();
+      db.ref('repertuarList').set([]);
     }
 
     function saveRepertuarToArchiwum() {
@@ -1170,12 +1223,11 @@
         songs: [...repertuarList]
       });
 
-      localStorage.setItem('archiwumList', JSON.stringify(archiwumList));
-      alert('Repertuar zapisano w archiwum!');
-      renderArchiwum();
+      db.ref('archiwumList').set(archiwumList);
+      alert('Repertuar zapisano w archiwum w chmurze!');
     }
 
-    // DO NAUKI
+    // DO NAUKI (FIREBASE)
     function promptAssignToNauka(songId) {
       if (!isAdmin) return;
 
@@ -1183,10 +1235,7 @@
       if (existingIndex > -1) {
         if (confirm('Ten utwór jest już w nauce. Czy chcesz go usunąć?')) {
           naukaAssignments.splice(existingIndex, 1);
-          localStorage.setItem('naukaAssignments', JSON.stringify(naukaAssignments));
-          renderNauka();
-          renderBaza();
-          renderRepertuar();
+          db.ref('naukaAssignments').set(naukaAssignments);
         }
         return;
       }
@@ -1218,22 +1267,15 @@
         eventDate: selEvent.dateStr
       });
 
-      localStorage.setItem('naukaAssignments', JSON.stringify(naukaAssignments));
-      renderNauka();
-      renderBaza();
-      renderRepertuar();
+      db.ref('naukaAssignments').set(naukaAssignments);
     }
 
     function clearNauka() {
       if (!isAdmin) return;
-      naukaAssignments = [];
-      localStorage.setItem('naukaAssignments', JSON.stringify([]));
-      renderNauka();
-      renderBaza();
-      renderRepertuar();
+      db.ref('naukaAssignments').set([]);
     }
 
-    // ARCHIWUM
+    // ARCHIWUM (FIREBASE)
     function renderArchiwum() {
       const container = document.getElementById('archiwumList');
       if (archiwumList.length === 0) {
@@ -1248,7 +1290,7 @@
             <small style="color:var(--text-muted);">${item.date}</small>
           </div>
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
-            ${item.songs.map(s => s.title).join(' • ')}
+            ${(item.songs || []).map(s => s.title).join(' • ')}
           </div>
           <div style="display:flex; gap:8px;">
             ${isAdmin ? `<button class="btn" style="flex:1;" onclick="loadArchivedToRepertuar(${item.id})">Wczytaj do repertuaru</button>` : ''}
@@ -1262,8 +1304,7 @@
       if (!isAdmin) return;
       if (confirm('Czy na pewno chcesz usunąć to wydarzenie z Archiwum?')) {
         archiwumList = archiwumList.filter(item => item.id !== id);
-        localStorage.setItem('archiwumList', JSON.stringify(archiwumList));
-        renderArchiwum();
+        db.ref('archiwumList').set(archiwumList);
       }
     }
 
@@ -1271,8 +1312,8 @@
       if (!isAdmin) return;
       const item = archiwumList.find(a => a.id === id);
       if (item) {
-        repertuarList = [...item.songs];
-        localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
+        repertuarList = [...(item.songs || [])];
+        db.ref('repertuarList').set(repertuarList);
         switchView('repertuar');
       }
     }

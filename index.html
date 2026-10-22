@@ -112,16 +112,16 @@
     }
 
     .main-title-lg {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 800;
       color: #111;
       margin-bottom: 2px;
     }
 
     .sub-title-md {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #222;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #111;
       margin-bottom: 12px;
     }
 
@@ -142,13 +142,13 @@
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* ICON TILES GRID (4 ICONS) */
+    /* ICON TILES GRID (5 ICONS) */
     .tiles-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
       margin-bottom: 24px;
-      padding: 0 8px;
+      padding: 0 4px;
     }
 
     .tile-card {
@@ -171,7 +171,7 @@
     }
 
     .tile-icon {
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       color: #111;
     }
 
@@ -394,6 +394,7 @@
       font-size: 0.95rem;
       line-height: 1.6;
       color: #222;
+      position: relative;
     }
 
     .status-msg {
@@ -411,7 +412,6 @@
       <!-- PRZYCISKI WYBORU GŁOSU / ADMINA -->
       <div class="voice-buttons-bar">
         <button class="voice-btn admin-btn" data-voice="ADMIN" onclick="selectVoice('ADMIN')">ADMIN 🔒</button>
-        <button class="voice-btn" data-voice="ALL" onclick="selectVoice('ALL')">WSZYSCY</button>
         <button class="voice-btn" data-voice="SOPRAN" onclick="selectVoice('SOPRAN')">SOPRAN</button>
         <button class="voice-btn" data-voice="ALT" onclick="selectVoice('ALT')">ALT</button>
         <button class="voice-btn" data-voice="TENOR" onclick="selectVoice('TENOR')">TENOR</button>
@@ -431,16 +431,16 @@
 
       <!-- 1. STRONA GŁÓWNA -->
       <div id="viewHome" class="view-section active">
-        <!-- 4 IKONKI NAWIGACYJNE -->
+        <!-- 5 IKON NAWIGACYJNYCH -->
         <div class="tiles-grid">
-          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki / Nuty">
+          <div class="tile-card" onclick="switchView('baza')" title="Bieżący repertuar (Nuty)">
             <span class="tile-icon">🎼</span>
           </div>
-          <div class="tile-card" onclick="switchView('edukacja')" title="Edukacja / Ćwiczenia">
+          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki (Czapka)">
             <span class="tile-icon">🎓</span>
           </div>
-          <div class="tile-card" onclick="switchView('baza')" title="Baza utworów / Śpiewnik">
-            <span class="tile-icon">📖</span>
+          <div class="tile-card" onclick="switchView('kalendarz')" title="Kalendarz i spotkania">
+            <span class="tile-icon">📅</span>
           </div>
           <div class="tile-card" onclick="switchView('archiwum')" title="Archiwum">
             <span class="tile-icon">📁</span>
@@ -457,7 +457,18 @@
         </div>
       </div>
 
-      <!-- 2. DO NAUKI -->
+      <!-- 2. BIEŻĄCY REPERTUAR (NUTY) -->
+      <div id="viewBaza" class="view-section">
+        <div class="section-header-bar">
+          <button class="btn" onclick="switchView('home')">← Powrót</button>
+          <h2 class="section-title">Bieżący Repertuar</h2>
+        </div>
+
+        <input type="text" id="searchInput" class="search-box" placeholder="Szukaj utworu..." oninput="renderBaza()" />
+        <div id="bazaList" class="song-grid"></div>
+      </div>
+
+      <!-- 3. DO NAUKI (CZAPKA) -->
       <div id="viewNauka" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -471,24 +482,17 @@
         <div id="naukaList" class="song-grid"></div>
       </div>
 
-      <!-- 3. BAZA UTWORÓW -->
-      <div id="viewBaza" class="view-section">
+      <!-- 4. KALENDARZ SPOTKAŃ -->
+      <div id="viewKalendarz" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
-          <h2 class="section-title">Baza Utworów</h2>
+          <h2 class="section-title">Kalendarz</h2>
         </div>
-
-        <input type="text" id="searchInput" class="search-box" placeholder="Szukaj utworu..." oninput="renderBaza()" />
-        <div id="bazaList" class="song-grid"></div>
-      </div>
-
-      <!-- 4. EDUKACJA / CĄWICZENIA -->
-      <div id="viewEdukacja" class="view-section">
-        <div class="section-header-bar">
-          <button class="btn" onclick="switchView('home')">← Powrót</button>
-          <h2 class="section-title">Edukacja</h2>
+        
+        <div id="adminCalendarControls" style="display:none; margin-bottom:14px;">
+          <button class="btn btn-primary" style="width:100%;" onclick="addCalendarEvent()">+ Dodaj wydarzenie / próbę</button>
         </div>
-        <div class="status-msg">Materiały edukacyjne i emisyjne zostaną dodane wkrótce.</div>
+        <div id="calendarList"></div>
       </div>
 
       <!-- 5. ARCHIWUM WYDARZEŃ -->
@@ -508,7 +512,10 @@
     <div class="song-detail-header">
       <button class="btn" onclick="closeSongDetail()">← Powrót</button>
       <h2 id="detailTitle" class="song-title-lg">TYTUŁ UTWORU</h2>
-      <button class="btn" id="detailNaukaBtn" style="display:none;">+</button>
+      <div style="display:flex; gap:4px;">
+        <button class="btn" id="detailRepertuarBtn" style="display:none;" title="Dodaj/usuń z repertuaru">🎼</button>
+        <button class="btn" id="detailNaukaBtn" style="display:none;" title="Dodaj/usuń do nauki">🎓</button>
+      </div>
     </div>
 
     <!-- NUTY Z PINCH-ZOOM -->
@@ -528,7 +535,10 @@
     </div>
 
     <!-- TEKST UTWORU -->
-    <div id="detailLyricsSection" class="lyrics-box" style="display:none;"></div>
+    <div style="position:relative;">
+      <div id="detailLyricsSection" class="lyrics-box" style="display:none;"></div>
+      <button class="btn" id="editLyricsBtn" style="position:absolute; top:8px; right:8px; display:none; font-size:0.7rem;" onclick="editSongLyrics()">✏️ Edytuj tekst</button>
+    </div>
   </div>
 
   <script>
@@ -536,14 +546,21 @@
     const API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
 
     let allSongs = [];
+    let repertuarList = JSON.parse(localStorage.getItem('repertuarList')) || [];
     let naukaList = JSON.parse(localStorage.getItem('naukaList')) || [];
     let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
-    let currentUserVoice = localStorage.getItem('userVoice') || 'ALL';
+    let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
+    let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [
+      { id: 1, title: 'Próba chóru', date: 'Każdy czwartek, godz. 19:00', desc: 'Sala parafialna' },
+      { id: 2, title: 'Oprawa Mszy Św.', date: 'Niedziela, godz. 10:00', desc: 'Kościół św. Jakuba i Krzysztofa' }
+    ];
 
+    let currentUserVoice = localStorage.getItem('userVoice') || 'ALL';
     let isAdmin = false;
     let currentZoom = 1;
+    let currentSongId = null;
 
-    // INICJALIZACJA WYBORU GŁOSU & OGŁOSZEŃ
+    // INICJALIZACJA APLIKACJI
     function initApp() {
       const savedAnn = localStorage.getItem('announcementsText');
       if (savedAnn) {
@@ -575,12 +592,14 @@
         }
       });
 
-      // Zmiana dostępności funkcji administratora
+      // Widoczność paneli administratora
       document.getElementById('editAnnouncementBtn').style.display = isAdmin ? 'inline-block' : 'none';
       document.getElementById('adminNaukaControls').style.display = isAdmin ? 'flex' : 'none';
+      document.getElementById('adminCalendarControls').style.display = isAdmin ? 'block' : 'none';
 
       renderBaza();
       renderNauka();
+      renderCalendar();
     }
 
     function editAnnouncement() {
@@ -591,6 +610,45 @@
         document.getElementById('announcementsContent').innerText = newText;
         localStorage.setItem('announcementsText', newText);
       }
+    }
+
+    // KALENDARZ
+    function renderCalendar() {
+      const container = document.getElementById('calendarList');
+      if (calendarEvents.length === 0) {
+        container.innerHTML = '<div class="status-msg">Brak zaplanowanych spotkań.</div>';
+        return;
+      }
+
+      container.innerHTML = calendarEvents.map(ev => `
+        <div style="background:#fff; border:1px solid #777; padding:14px; border-radius:8px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <strong style="font-size:0.95rem;">${ev.title}</strong>
+            <small style="color:var(--text-muted);">${ev.date}</small>
+          </div>
+          <div style="font-size:0.85rem; color:#444;">${ev.desc}</div>
+          ${isAdmin ? `<button class="btn" style="margin-top:8px; font-size:0.7rem; color:darkred;" onclick="deleteCalendarEvent(${ev.id})">Usuń wydarzenie</button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function addCalendarEvent() {
+      if (!isAdmin) return;
+      const title = prompt('Nazwa wydarzenia / spotkania:');
+      if (!title) return;
+      const date = prompt('Termin (np. 15.11.2026 / Co wtorek):');
+      const desc = prompt('Opis / Miejsce:');
+
+      calendarEvents.push({ id: Date.now(), title, date: date || '', desc: desc || '' });
+      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
+      renderCalendar();
+    }
+
+    function deleteCalendarEvent(id) {
+      if (!isAdmin) return;
+      calendarEvents = calendarEvents.filter(e => e.id !== id);
+      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
+      renderCalendar();
     }
 
     // POBIERANIE KATALOGU Z GOOGLE DRIVE
@@ -625,6 +683,12 @@
         }
 
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
+
+        // Domyślnie dodaj wszystkie do bieżącego repertuaru jeśli puste
+        if (repertuarList.length === 0) {
+          repertuarList = [...allSongs];
+          localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
+        }
 
         statusEl.style.display = 'none';
         
@@ -688,9 +752,10 @@
     function renderBaza() {
       const container = document.getElementById('bazaList');
       const search = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allSongs.filter(s => s.title.toLowerCase().includes(search));
+      // Baza wyświetla bieżący repertuar (Nuty)
+      const filtered = repertuarList.filter(s => s.title.toLowerCase().includes(search));
 
-      container.innerHTML = filtered.map(song => renderSongCardHtml(song)).join('');
+      container.innerHTML = filtered.map(song => renderSongCardHtml(song, 'repertuar')).join('');
     }
 
     function renderNauka() {
@@ -699,16 +764,22 @@
         container.innerHTML = '<div class="status-msg">Brak utworów w zestawie do nauki.</div>';
         return;
       }
-      container.innerHTML = naukaList.map(song => renderSongCardHtml(song)).join('');
+      container.innerHTML = naukaList.map(song => renderSongCardHtml(song, 'nauka')).join('');
     }
 
-    function renderSongCardHtml(song) {
+    function renderSongCardHtml(song, type) {
+      const inRepertuar = repertuarList.some(s => s.id === song.id);
       const inNauka = naukaList.some(s => s.id === song.id);
-      
-      const adminBtnHtml = isAdmin ? `
-        <button class="btn" onclick="event.stopPropagation(); toggleNauka('${song.id}')">
-          ${inNauka ? '✓ W nauce' : '+ Do nauki'}
-        </button>
+
+      const adminActionsHtml = isAdmin ? `
+        <div style="display:flex; gap:4px;" onclick="event.stopPropagation()">
+          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="toggleRepertuar('${song.id}')">
+            ${inRepertuar ? '🎼 ✓' : '🎼 +'}
+          </button>
+          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="toggleNauka('${song.id}')">
+            ${inNauka ? '🎓 ✓' : '🎓 +'}
+          </button>
+        </div>
       ` : '';
 
       return `
@@ -717,13 +788,14 @@
             <strong>${song.title.toUpperCase()}</strong>
             <span>Nagrania: ${song.audioTracks.length} ścieżki</span>
           </div>
-          ${adminBtnHtml}
+          ${adminActionsHtml}
         </div>
       `;
     }
 
     // OTWIERANIE PODSTRONY UTWORU
     function openSongDetail(songId) {
+      currentSongId = songId;
       const song = allSongs.find(s => s.id === songId);
       if (!song) return;
 
@@ -739,12 +811,12 @@
       }
       resetZoom();
 
-      // Audio - Pokaż wszystkie ścieżki dla ALL i ADMIN, lub wyfiltrowane dla głosu
+      // Audio - Automatyczne pokazywanie wszystkich lub filtrowane po głosie
       const audioSec = document.getElementById('detailAudioSection');
       const audioListEl = document.getElementById('detailAudioList');
 
       const filteredAudio = song.audioTracks.filter(track => {
-        if (currentUserVoice === 'ALL' || currentUserVoice === 'ADMIN') return true;
+        if (currentUserVoice === 'ALL' || currentUserVoice === 'ADMIN' || !currentUserVoice) return true;
         return track.voice === 'TUTTI' || track.voice === currentUserVoice;
       });
 
@@ -760,27 +832,43 @@
         audioSec.style.display = 'none';
       }
 
-      // Tekst
+      // Tekst utworu (wsparcie dla customowych tekstów wpisanych przez admina)
       const lyricsSec = document.getElementById('detailLyricsSection');
-      if (song.lyricsText) {
-        lyricsSec.innerText = song.lyricsText;
+      const editLyricsBtn = document.getElementById('editLyricsBtn');
+      const activeLyrics = customLyrics[songId] || song.lyricsText;
+
+      if (activeLyrics) {
+        lyricsSec.innerText = activeLyrics;
         lyricsSec.style.display = 'block';
       } else {
-        lyricsSec.style.display = 'none';
+        lyricsSec.innerText = isAdmin ? 'Brak tekstu. Kliknij "Edytuj tekst", aby dodać słowa.' : '';
+        lyricsSec.style.display = isAdmin ? 'block' : 'none';
       }
 
-      // Przycisk Dodaj do nauki (tylko w trybie ADMIN)
-      const naukaBtn = document.getElementById('detailNaukaBtn');
       if (isAdmin) {
-        naukaBtn.style.display = 'inline-block';
-        const inNauka = naukaList.some(s => s.id === song.id);
-        naukaBtn.innerText = inNauka ? '✓ W nauce' : '+ Do nauki';
-        naukaBtn.onclick = () => {
-          toggleNauka(song.id);
-          const newState = naukaList.some(s => s.id === song.id);
-          naukaBtn.innerText = newState ? '✓ W nauce' : '+ Do nauki';
-        };
+        editLyricsBtn.style.display = 'inline-block';
       } else {
+        editLyricsBtn.style.display = 'none';
+      }
+
+      // Przyciski zarządzania w nagłówku szczegółów (dla Admina)
+      const repBtn = document.getElementById('detailRepertuarBtn');
+      const naukaBtn = document.getElementById('detailNaukaBtn');
+
+      if (isAdmin) {
+        repBtn.style.display = 'inline-block';
+        naukaBtn.style.display = 'inline-block';
+
+        const inRep = repertuarList.some(s => s.id === song.id);
+        const inNauka = naukaList.some(s => s.id === song.id);
+
+        repBtn.innerText = inRep ? '🎼 ✓' : '🎼 +';
+        naukaBtn.innerText = inNauka ? '🎓 ✓' : '🎓 +';
+
+        repBtn.onclick = () => { toggleRepertuar(song.id); openSongDetail(song.id); };
+        naukaBtn.onclick = () => { toggleNauka(song.id); openSongDetail(song.id); };
+      } else {
+        repBtn.style.display = 'none';
         naukaBtn.style.display = 'none';
       }
 
@@ -791,6 +879,17 @@
       document.getElementById('viewSongDetail').classList.remove('active');
       const audioListEl = document.getElementById('detailAudioList');
       audioListEl.querySelectorAll('audio').forEach(a => a.pause());
+    }
+
+    function editSongLyrics() {
+      if (!isAdmin || !currentSongId) return;
+      const currentText = customLyrics[currentSongId] || '';
+      const newText = prompt('Wpisz lub edytuj tekst pieśni:', currentText);
+      if (newText !== null) {
+        customLyrics[currentSongId] = newText;
+        localStorage.setItem('customLyrics', JSON.stringify(customLyrics));
+        openSongDetail(currentSongId);
+      }
     }
 
     // PINCH TO ZOOM & ZOOM CONTROLS
@@ -804,7 +903,6 @@
       document.getElementById('detailSheet').style.transform = 'scale(1)';
     }
 
-    // Touch events do pinch zoom na telefonie
     let initialDist = 0;
     const sheetContainer = document.getElementById('sheetContainer');
 
@@ -829,7 +927,20 @@
       }
     });
 
-    // DO NAUKI & ARCHIWUM
+    // ZARZĄDZANIE REPERTUAREM I NAUKĄ
+    function toggleRepertuar(songId) {
+      if (!isAdmin) return;
+      const index = repertuarList.findIndex(s => s.id === songId);
+      if (index > -1) {
+        repertuarList.splice(index, 1);
+      } else {
+        const song = allSongs.find(s => s.id === songId);
+        if (song) repertuarList.push(song);
+      }
+      localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
+      renderBaza();
+    }
+
     function toggleNauka(songId) {
       if (!isAdmin) return;
       const index = naukaList.findIndex(s => s.id === songId);
@@ -840,7 +951,6 @@
         if (song) naukaList.push(song);
       }
       localStorage.setItem('naukaList', JSON.stringify(naukaList));
-      renderBaza();
       renderNauka();
     }
 
@@ -849,13 +959,12 @@
       naukaList = [];
       localStorage.setItem('naukaList', JSON.stringify([]));
       renderNauka();
-      renderBaza();
     }
 
     function saveNaukaToArchiwum() {
       if (!isAdmin) return;
-      if (naukaList.length === 0) return alert('Brak utworów do zapisania!');
-      const name = prompt('Nazwa wydarzenia (np. Niedziela 10:00):');
+      if (naukaList.length === 0) return alert('Brak utworów w nauce do zapisania!');
+      const name = prompt('Nazwa wydarzenia w archiwum (np. Niedziela 10:00 / Ślub):');
       if (!name) return;
 
       archiwumList.unshift({
@@ -907,14 +1016,15 @@
 
       if (viewName === 'home') {
         document.getElementById('viewHome').classList.add('active');
-      } else if (viewName === 'nauka') {
-        document.getElementById('viewNauka').classList.add('active');
-        renderNauka();
       } else if (viewName === 'baza') {
         document.getElementById('viewBaza').classList.add('active');
         renderBaza();
-      } else if (viewName === 'edukacja') {
-        document.getElementById('viewEdukacja').classList.add('active');
+      } else if (viewName === 'nauka') {
+        document.getElementById('viewNauka').classList.add('active');
+        renderNauka();
+      } else if (viewName === 'kalendarz') {
+        document.getElementById('viewKalendarz').classList.add('active');
+        renderCalendar();
       } else if (viewName === 'archiwum') {
         document.getElementById('viewArchiwum').classList.add('active');
         renderArchiwum();

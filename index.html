@@ -631,11 +631,11 @@
     const DRIVE_API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
     const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
 
-    // Konfiguracja Firebase (chor-psie-pole) z obsługą błędów połączenia
+    // Konfiguracja Firebase (chor-psie-pole) z poprawnym europejskim adresem bazy
     const firebaseConfig = {
       apiKey: "AIzaSyCa7IeaO36b7XBJA723CC4zJAjI6BgP5wQ",
       authDomain: "chor-psie-pole.firebaseapp.com",
-      databaseURL: "https://chor-psie-pole-default-rtdb.firebaseio.com",
+      databaseURL: "https://chor-psie-pole-default-rtdb.europe-west1.firebasedatabase.app/",
       projectId: "chor-psie-pole",
       storageBucket: "chor-psie-pole.firebasestorage.app",
       messagingSenderId: "493515214319",
@@ -1249,7 +1249,7 @@
         <div style="background:#fff; border:1px solid #777; padding:14px; border-radius:8px; margin-bottom:10px;">
           <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
             <strong style="font-size:0.95rem;">${item.title}</strong>
-            <small style="color:var(--text-muted);">${item.date}</small>
+            <small style="color:var::text-muted);">${item.date}</small>
           </div>
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
             ${(item.songs || []).map(s => s.title).join(' • ')}

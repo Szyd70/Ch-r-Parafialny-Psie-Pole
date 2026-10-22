@@ -258,6 +258,12 @@
       border-color: #000;
     }
 
+    .btn-black {
+      background-color: #333;
+      color: #fff;
+      border-color: #111;
+    }
+
     .search-box {
       width: 100%;
       padding: 10px;
@@ -434,6 +440,36 @@
       color: var(--text-muted);
       font-size: 0.85rem;
     }
+
+    .pitch-panel {
+      background: #f7f7f7;
+      border: 1px solid #777;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .pitch-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .pitch-row-accidentals {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      padding: 0 5%;
+    }
+
+    .pitch-btn {
+      padding: 8px 2px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -597,22 +633,31 @@
       <button class="btn" onclick="closeSongDetail()">← Powrót</button>
       <h2 id="detailTitle" class="song-title-lg">TYTUŁ UTWORU</h2>
       <div style="display:flex; gap:4px;">
+        <button class="btn" onclick="togglePitchPanel()" title="Kamerton / Intonacja">🎵</button>
         <button class="btn" id="detailRepertuarBtn" style="display:none;" title="Dodaj/usuń z repertuaru">🎼</button>
         <button class="btn" id="detailNaukaBtn" style="display:none;" title="Dodaj/usuń do nauki">🎓</button>
       </div>
     </div>
 
-    <!-- SEKCJA INTONACJI / KAMERTONU (Środkowa oktawa, wyłączanie po 1 sek.) -->
-    <div style="background:#f2f2f2; border:1px solid #777; border-radius:8px; padding:10px;">
-      <h4 style="font-size:0.78rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; text-align:center;">Intonacja (Środkowa oktawa - 1 sek.):</h4>
-      <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:4px;">
-        <button class="btn" style="padding:6px 2px; font-size:0.75rem;" onclick="playTone(261.63)">C</button>
-        <button class="btn" style="padding:6px 2px; font-size:0.75rem;" onclick="playTone(293.66)">D</button>
-        <button class="btn" style="padding:6px 2px; font-size:0.75rem;" onclick="playTone(329.63)">E</button>
-        <button class="btn" style="padding:6px 2px; font-size:0.75rem;" onclick="playTone(349.23)">F</button>
-        <button class="btn" style="padding:6px 2px; font-size:0.75rem;" onclick="playTone(392.00)">G</button>
-        <button class="btn btn-primary" style="padding:6px 2px; font-size:0.75rem;" onclick="playTone(440.00)" title="Kamerton A4">A</button>
-        <button class="btn" style="padding:6px 2px; font-size:0.75rem;" onclick="playTone(493.88)">H</button>
+    <!-- PANEL INTONACJI / KAMERTONU (Środkowa oktawa: 12 tonów z półtonami, auto-stop po 1s) -->
+    <div id="pitchPanel" class="pitch-panel" style="display:none;">
+      <!-- Półtony (czarne klawisze) -->
+      <div class="pitch-row-accidentals">
+        <button class="btn btn-black pitch-btn" onclick="playTone(277.18)">C#</button>
+        <button class="btn btn-black pitch-btn" onclick="playTone(311.13)">D#</button>
+        <button class="btn btn-black pitch-btn" onclick="playTone(369.99)">F#</button>
+        <button class="btn btn-black pitch-btn" onclick="playTone(415.30)">G#</button>
+        <button class="btn btn-black pitch-btn" onclick="playTone(466.16)">A#</button>
+      </div>
+      <!-- Dźwięki podstawowe (białe klawisze) -->
+      <div class="pitch-row">
+        <button class="btn pitch-btn" onclick="playTone(261.63)">C</button>
+        <button class="btn pitch-btn" onclick="playTone(293.66)">D</button>
+        <button class="btn pitch-btn" onclick="playTone(329.63)">E</button>
+        <button class="btn pitch-btn" onclick="playTone(349.23)">F</button>
+        <button class="btn pitch-btn" onclick="playTone(392.00)">G</button>
+        <button class="btn btn-primary pitch-btn" onclick="playTone(440.00)" title="Kamerton A4">A</button>
+        <button class="btn pitch-btn" onclick="playTone(493.88)">H</button>
       </div>
     </div>
 
@@ -674,7 +719,7 @@
     let currentZoom = 1;
     let currentSongId = null;
 
-    // WEB AUDIO API - INTONACJA (Generowanie dźwięku przez dokładnie 1 sekundę)
+    // WEB AUDIO API - GENERATOR DŹWIĘKU (INTONACJA - Czas trwania: 1 sekunda)
     let audioCtx = null;
 
     function playTone(freq) {
@@ -689,13 +734,13 @@
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
 
-      osc.type = 'sine'; // Czysty, łagodny ton kamertonu
+      osc.type = 'sine'; // Czysta fala sinusoidalna kamertonu
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-      // Płynne łagodzenie głośności (narastanie i opadanie po 1 sek)
+      // Płynna głośność (attack i release) przez dokładnie 1 sekundę
       gain.gain.setValueAtTime(0, audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime + 0.9);
+      gain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime + 0.9);
       gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.0);
 
       osc.connect(gain);
@@ -703,6 +748,11 @@
 
       osc.start(audioCtx.currentTime);
       osc.stop(audioCtx.currentTime + 1.0);
+    }
+
+    function togglePitchPanel() {
+      const panel = document.getElementById('pitchPanel');
+      panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'flex' : 'none';
     }
 
     function setupCloudSync() {
@@ -1082,6 +1132,9 @@
       if (!song) return;
 
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
+
+      // Domyślnie schowaj panel intonacji przy otwarciu nowego utworu
+      document.getElementById('pitchPanel').style.display = 'none';
 
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {

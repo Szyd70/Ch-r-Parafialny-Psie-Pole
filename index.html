@@ -142,19 +142,19 @@
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* ICON TILES GRID (5 ICONS) */
+    /* ICON TILES GRID (5 ICONS IN A ROW) */
     .tiles-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 24px;
-      padding: 0 4px;
+      padding: 0 2px;
     }
 
     .tile-card {
       background: #f0f0f0;
       border: 1.5px solid #666;
-      border-radius: 12px;
+      border-radius: 10px;
       aspect-ratio: 1 / 1;
       display: flex;
       flex-direction: column;
@@ -171,7 +171,7 @@
     }
 
     .tile-icon {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       color: #111;
     }
 
@@ -188,7 +188,7 @@
       justify-content: center;
       text-align: center;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
-      margin: 0 8px;
+      margin: 0 4px;
       position: relative;
     }
 
@@ -433,11 +433,14 @@
       <div id="viewHome" class="view-section active">
         <!-- 5 IKON NAWIGACYJNYCH -->
         <div class="tiles-grid">
-          <div class="tile-card" onclick="switchView('baza')" title="Bieżący repertuar (Nuty)">
+          <div class="tile-card" onclick="switchView('repertuar')" title="Bieżący repertuar">
             <span class="tile-icon">🎼</span>
           </div>
-          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki (Czapka)">
+          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki">
             <span class="tile-icon">🎓</span>
+          </div>
+          <div class="tile-card" onclick="switchView('baza')" title="Cała baza utworów / Śpiewnik">
+            <span class="tile-icon">📖</span>
           </div>
           <div class="tile-card" onclick="switchView('kalendarz')" title="Kalendarz i spotkania">
             <span class="tile-icon">📅</span>
@@ -458,14 +461,14 @@
       </div>
 
       <!-- 2. BIEŻĄCY REPERTUAR (NUTY) -->
-      <div id="viewBaza" class="view-section">
+      <div id="viewRepertuar" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
           <h2 class="section-title">Bieżący Repertuar</h2>
         </div>
 
-        <input type="text" id="searchInput" class="search-box" placeholder="Szukaj utworu..." oninput="renderBaza()" />
-        <div id="bazaList" class="song-grid"></div>
+        <input type="text" id="searchRepertuarInput" class="search-box" placeholder="Szukaj w repertuarze..." oninput="renderRepertuar()" />
+        <div id="repertuarList" class="song-grid"></div>
       </div>
 
       <!-- 3. DO NAUKI (CZAPKA) -->
@@ -482,7 +485,18 @@
         <div id="naukaList" class="song-grid"></div>
       </div>
 
-      <!-- 4. KALENDARZ SPOTKAŃ -->
+      <!-- 4. CAŁA BAZA UTWORÓW / ŚPIEWNIK (KSIĄŻKA) -->
+      <div id="viewBaza" class="view-section">
+        <div class="section-header-bar">
+          <button class="btn" onclick="switchView('home')">← Powrót</button>
+          <h2 class="section-title">Cała Baza Utworów</h2>
+        </div>
+
+        <input type="text" id="searchInput" class="search-box" placeholder="Szukaj w całej bazie..." oninput="renderBaza()" />
+        <div id="bazaList" class="song-grid"></div>
+      </div>
+
+      <!-- 5. KALENDARZ SPOTKAŃ -->
       <div id="viewKalendarz" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -495,7 +509,7 @@
         <div id="calendarList"></div>
       </div>
 
-      <!-- 5. ARCHIWUM WYDARZEŃ -->
+      <!-- 6. ARCHIWUM WYDARZEŃ -->
       <div id="viewArchiwum" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -555,12 +569,11 @@
       { id: 2, title: 'Oprawa Mszy Św.', date: 'Niedziela, godz. 10:00', desc: 'Kościół św. Jakuba i Krzysztofa' }
     ];
 
-    let currentUserVoice = localStorage.getItem('userVoice') || 'ALL';
+    let currentUserVoice = localStorage.getItem('userVoice') || 'NONE';
     let isAdmin = false;
     let currentZoom = 1;
     let currentSongId = null;
 
-    // INICJALIZACJA APLIKACJI
     function initApp() {
       const savedAnn = localStorage.getItem('announcementsText');
       if (savedAnn) {
@@ -569,6 +582,7 @@
       selectVoice(currentUserVoice, false);
     }
 
+    // TOGGLE SELEKCJI GŁOSU (ODZNACZANIE PO PONOWNYM KLIKNIĘCIU)
     function selectVoice(voice, save = true) {
       if (voice === 'ADMIN' && !isAdmin) {
         const pass = prompt('Podaj hasło administratora:');
@@ -581,22 +595,28 @@
         }
       }
 
-      currentUserVoice = voice;
-      if (save) localStorage.setItem('userVoice', voice);
+      // Odznaczanie, jeśli kliknięto w aktywny głos
+      if (currentUserVoice === voice && voice !== 'ADMIN') {
+        currentUserVoice = 'NONE';
+      } else {
+        currentUserVoice = voice;
+      }
+
+      if (save) localStorage.setItem('userVoice', currentUserVoice);
 
       document.querySelectorAll('.voice-btn').forEach(btn => {
-        if (btn.getAttribute('data-voice') === voice) {
+        if (btn.getAttribute('data-voice') === currentUserVoice) {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
         }
       });
 
-      // Widoczność paneli administratora
       document.getElementById('editAnnouncementBtn').style.display = isAdmin ? 'inline-block' : 'none';
       document.getElementById('adminNaukaControls').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('adminCalendarControls').style.display = isAdmin ? 'block' : 'none';
 
+      renderRepertuar();
       renderBaza();
       renderNauka();
       renderCalendar();
@@ -684,7 +704,6 @@
 
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
 
-        // Domyślnie dodaj wszystkie do bieżącego repertuaru jeśli puste
         if (repertuarList.length === 0) {
           repertuarList = [...allSongs];
           localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
@@ -692,6 +711,7 @@
 
         statusEl.style.display = 'none';
         
+        renderRepertuar();
         renderBaza();
         renderNauka();
         renderArchiwum();
@@ -748,14 +768,23 @@
       }
     }
 
-    // RENDERING
-    function renderBaza() {
-      const container = document.getElementById('bazaList');
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      // Baza wyświetla bieżący repertuar (Nuty)
+    // RENDERING WIDOKÓW
+    function renderRepertuar() {
+      const container = document.getElementById('repertuarList');
+      const searchEl = document.getElementById('searchRepertuarInput');
+      const search = searchEl ? searchEl.value.toLowerCase() : '';
       const filtered = repertuarList.filter(s => s.title.toLowerCase().includes(search));
 
-      container.innerHTML = filtered.map(song => renderSongCardHtml(song, 'repertuar')).join('');
+      container.innerHTML = filtered.map(song => renderSongCardHtml(song)).join('');
+    }
+
+    function renderBaza() {
+      const container = document.getElementById('bazaList');
+      const searchEl = document.getElementById('searchInput');
+      const search = searchEl ? searchEl.value.toLowerCase() : '';
+      const filtered = allSongs.filter(s => s.title.toLowerCase().includes(search));
+
+      container.innerHTML = filtered.map(song => renderSongCardHtml(song)).join('');
     }
 
     function renderNauka() {
@@ -764,10 +793,10 @@
         container.innerHTML = '<div class="status-msg">Brak utworów w zestawie do nauki.</div>';
         return;
       }
-      container.innerHTML = naukaList.map(song => renderSongCardHtml(song, 'nauka')).join('');
+      container.innerHTML = naukaList.map(song => renderSongCardHtml(song)).join('');
     }
 
-    function renderSongCardHtml(song, type) {
+    function renderSongCardHtml(song) {
       const inRepertuar = repertuarList.some(s => s.id === song.id);
       const inNauka = naukaList.some(s => s.id === song.id);
 
@@ -811,12 +840,12 @@
       }
       resetZoom();
 
-      // Audio - Automatyczne pokazywanie wszystkich lub filtrowane po głosie
+      // Audio - Pokazuje wszystkie ścieżki dla NONE i ADMIN, lub wybraną dla głosu
       const audioSec = document.getElementById('detailAudioSection');
       const audioListEl = document.getElementById('detailAudioList');
 
       const filteredAudio = song.audioTracks.filter(track => {
-        if (currentUserVoice === 'ALL' || currentUserVoice === 'ADMIN' || !currentUserVoice) return true;
+        if (currentUserVoice === 'NONE' || currentUserVoice === 'ADMIN' || !currentUserVoice) return true;
         return track.voice === 'TUTTI' || track.voice === currentUserVoice;
       });
 
@@ -832,7 +861,7 @@
         audioSec.style.display = 'none';
       }
 
-      // Tekst utworu (wsparcie dla customowych tekstów wpisanych przez admina)
+      // Tekst
       const lyricsSec = document.getElementById('detailLyricsSection');
       const editLyricsBtn = document.getElementById('editLyricsBtn');
       const activeLyrics = customLyrics[songId] || song.lyricsText;
@@ -845,13 +874,9 @@
         lyricsSec.style.display = isAdmin ? 'block' : 'none';
       }
 
-      if (isAdmin) {
-        editLyricsBtn.style.display = 'inline-block';
-      } else {
-        editLyricsBtn.style.display = 'none';
-      }
+      editLyricsBtn.style.display = isAdmin ? 'inline-block' : 'none';
 
-      // Przyciski zarządzania w nagłówku szczegółów (dla Admina)
+      // Przyciski zarządzania dla Admina
       const repBtn = document.getElementById('detailRepertuarBtn');
       const naukaBtn = document.getElementById('detailNaukaBtn');
 
@@ -938,7 +963,7 @@
         if (song) repertuarList.push(song);
       }
       localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
-      renderBaza();
+      renderRepertuar();
     }
 
     function toggleNauka(songId) {
@@ -1016,12 +1041,15 @@
 
       if (viewName === 'home') {
         document.getElementById('viewHome').classList.add('active');
-      } else if (viewName === 'baza') {
-        document.getElementById('viewBaza').classList.add('active');
-        renderBaza();
+      } else if (viewName === 'repertuar') {
+        document.getElementById('viewRepertuar').classList.add('active');
+        renderRepertuar();
       } else if (viewName === 'nauka') {
         document.getElementById('viewNauka').classList.add('active');
         renderNauka();
+      } else if (viewName === 'baza') {
+        document.getElementById('viewBaza').classList.add('active');
+        renderBaza();
       } else if (viewName === 'kalendarz') {
         document.getElementById('viewKalendarz').classList.add('active');
         renderCalendar();

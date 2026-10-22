@@ -132,12 +132,12 @@
       margin-bottom: 12px;
     }
 
-    /* GRAFIKA BEZ TŁA W MENU */
+    /* FALOWANA PIĘCIOLINIA Z NUTAMI */
     .chorus-graphic {
-      width: 90px;
-      margin: 0 auto 15px;
+      width: 220px;
+      height: auto;
+      margin: 4px auto 12px;
       display: block;
-      opacity: 0.85;
     }
 
     /* LAYOUT VIEWS */
@@ -464,14 +464,34 @@
         <h2 class="sub-title-md">Wrocław Psie Pole</h2>
         <div class="tagline">ŚPIEWAJ ZE MNĄ!</div>
 
-        <!-- GRAFIKA BEZ TŁA (SVG) -->
-        <svg class="chorus-graphic" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M128 0H0V128H128V0Z" fill="none"/>
-          <path d="M43.6 88C35 88 28 81 28 72.4C28 63.8 35 56.8 43.6 56.8C52.2 56.8 59.2 63.8 59.2 72.4C59.2 81 52.2 88 43.6 88ZM43.6 62.8C38.3 62.8 34 67.1 34 72.4C34 77.7 38.3 82 43.6 82C48.9 82 53.2 77.7 53.2 72.4C53.2 67.1 48.9 62.8 43.6 62.8Z" fill="#111111"/>
-          <path d="M72.4 103.2V113.2H66.4V103.2H56.4V97.2H66.4V87.2H72.4V97.2H82.4V103.2H72.4Z" fill="#111111"/>
-          <path d="M43.6 44C38.3 44 34 39.7 34 34.4C34 29.1 38.3 24.8 43.6 24.8C48.9 24.8 53.2 29.1 53.2 34.4C53.2 39.7 48.9 44 43.6 44ZM43.6 30.8C41.6 30.8 40 32.4 40 34.4C40 36.4 41.6 38 43.6 38C45.6 38 47.2 36.4 47.2 34.4C47.2 32.4 45.6 30.8 43.6 30.8Z" fill="#111111"/>
-          <path d="M100 44C94.7 44 90.4 39.7 90.4 34.4C90.4 29.1 94.7 24.8 100 24.8C105.3 24.8 109.6 29.1 109.6 34.4C109.6 39.7 105.3 44 100 44ZM100 30.8C98 30.8 96.4 32.4 96.4 34.4C96.4 36.4 98 38 100 38C102 38 103.6 36.4 103.6 34.4C103.6 32.4 102 30.8 100 30.8Z" fill="#111111"/>
-          <path d="M84.4 88C75.8 88 68.8 81 68.8 72.4C68.8 63.8 75.8 56.8 84.4 56.8C93 56.8 100 63.8 100 72.4C100 81 93 88 84.4 88ZM84.4 62.8C79.1 62.8 74.8 67.1 74.8 72.4C74.8 77.7 79.1 82 84.4 82C89.7 82 94 77.7 94 72.4C94 67.1 89.7 62.8 84.4 62.8Z" fill="#111111"/>
+        <!-- FALOWANA PIĘCIOLINIA Z NUTAMI (SVG) -->
+        <svg class="chorus-graphic" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 5 Falowanych Linii (Pięciolinia) -->
+          <path d="M 10 35 Q 80 80, 160 35 T 310 35" stroke="#111111" stroke-width="2.5" fill="none"/>
+          <path d="M 10 43 Q 80 88, 160 43 T 310 43" stroke="#111111" stroke-width="2.5" fill="none"/>
+          <path d="M 10 51 Q 80 96, 160 51 T 310 51" stroke="#111111" stroke-width="2.5" fill="none"/>
+          <path d="M 10 59 Q 80 104, 160 59 T 310 59" stroke="#111111" stroke-width="2.5" fill="none"/>
+          <path d="M 10 67 Q 80 112, 160 67 T 310 67" stroke="#111111" stroke-width="2.5" fill="none"/>
+
+          <!-- Pierwsza Nuta (Polićwiertnuta / Ćwierćnuta) -->
+          <g fill="#111111" stroke="#111111">
+            <!-- Głowa nuty -->
+            <ellipse cx="118" cy="74" rx="10" ry="7" transform="rotate(-25 118 74)"/>
+            <!-- Laska nuty -->
+            <rect x="124" y="28" width="3.5" height="46" rx="1"/>
+            <!-- Chorągiewka -->
+            <path d="M 127.5 28 C 137 36, 142 48, 137 60 C 134 50, 130 40, 127.5 35 Z"/>
+          </g>
+
+          <!-- Druga Nuta (Wyższa) -->
+          <g fill="#111111" stroke="#111111">
+            <!-- Głowa nuty -->
+            <ellipse cx="195" cy="58" rx="10" ry="7" transform="rotate(-25 195 58)"/>
+            <!-- Laska nuty -->
+            <rect x="201" y="12" width="3.5" height="46" rx="1"/>
+            <!-- Chorągiewka -->
+            <path d="M 204.5 12 C 214 20, 219 32, 214 44 C 211 34, 207 24, 204.5 19 Z"/>
+          </g>
         </svg>
       </div>
     </header>

@@ -294,6 +294,18 @@
       color: var(--text-muted);
     }
 
+    .event-group-header {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      background: #c8c8c8;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      border: 1px solid #999;
+    }
+
     /* FORMULARZ KALENDARZA */
     .event-form-card {
       background: #fff;
@@ -483,6 +495,11 @@
           <h2 class="section-title">Bieżący Repertuar</h2>
         </div>
 
+        <div id="adminRepertuarControls" style="display:none; gap:10px; margin-bottom:14px;">
+          <button class="btn" style="flex:1;" onclick="clearRepertuar()">Wyczyść repertuar</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="saveRepertuarToArchiwum()">💾 Zapisz do Archiwum</button>
+        </div>
+
         <input type="text" id="searchRepertuarInput" class="search-box" placeholder="Szukaj w repertuarze..." oninput="renderRepertuar()" />
         <div id="repertuarList" class="song-grid"></div>
       </div>
@@ -495,10 +512,9 @@
         </div>
 
         <div id="adminNaukaControls" style="display:none; gap:10px; margin-bottom:14px;">
-          <button class="btn" style="flex:1;" onclick="clearNauka()">Wyczyść zestaw</button>
-          <button class="btn btn-primary" style="flex:1;" onclick="saveNaukaToArchiwum()">💾 Zapisz do Archiwum</button>
+          <button class="btn" style="width:100%;" onclick="clearNauka()">Wyczyść zestaw do nauki</button>
         </div>
-        <div id="naukaList" class="song-grid"></div>
+        <div id="naukaList"></div>
       </div>
 
       <!-- 4. CAŁA BAZA UTWORÓW / ŚPIEWNIK (KSIĄŻKA) -->
@@ -596,7 +612,7 @@
 
     let allSongs = [];
     let repertuarList = JSON.parse(localStorage.getItem('repertuarList')) || [];
-    let naukaList = JSON.parse(localStorage.getItem('naukaList')) || [];
+    let naukaAssignments = JSON.parse(localStorage.getItem('naukaAssignments')) || []; // [{ songId, eventId, eventTitle, eventDate }]
     let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
     let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
     let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
@@ -648,6 +664,7 @@
       });
 
       document.getElementById('editAnnouncementBtn').style.display = isAdmin ? 'inline-block' : 'none';
+      document.getElementById('adminRepertuarControls').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('adminNaukaControls').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('adminCalendarControls').style.display = isAdmin ? 'block' : 'none';
 
@@ -667,7 +684,7 @@
       }
     }
 
-    // --- ELASTYCZNY KALENDARZ CYKLICZNY ---
+    // --- LOGIKA KALENDARZA ---
     function toggleCalendarForm() {
       const card = document.getElementById('calendarFormCard');
       card.style.display = card.style.display === 'none' ? 'flex' : 'none';
@@ -678,7 +695,7 @@
       const title = document.getElementById('evTitle').value.trim();
       const time = document.getElementById('evTime').value;
       const startDateStr = document.getElementById('evStartDate').value;
-      const recurrenceWeeks = document.getElementById('evRecurrence').value; // 'NONE' lub liczba tygodni ('1', '2', '3'...)
+      const recurrenceWeeks = document.getElementById('evRecurrence').value;
       const desc = document.getElementById('evDesc').value.trim();
 
       if (!title || !startDateStr) {
@@ -692,7 +709,6 @@
         generatedDates.push(startDateStr);
       } else {
         const weeksInterval = parseInt(recurrenceWeeks, 10);
-        // Generujemy automatycznie np. 8 wystąpień do przodu w wybranym interwale tygodniowym
         for (let i = 0; i < 8; i++) {
           let d = new Date(currentDate);
           d.setDate(d.getDate() + (i * weeksInterval * 7));
@@ -715,13 +731,16 @@
       renderCalendar();
     }
 
-    function renderCalendar() {
-      const container = document.getElementById('calendarList');
+    function getUpcomingCalendarEvents() {
       const todayStr = new Date().toISOString().split('T')[0];
-
-      let sortedEvents = calendarEvents
+      return calendarEvents
         .filter(ev => ev.dateStr >= todayStr)
         .sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+    }
+
+    function renderCalendar() {
+      const container = document.getElementById('calendarList');
+      const sortedEvents = getUpcomingCalendarEvents();
 
       if (sortedEvents.length === 0) {
         container.innerHTML = '<div class="status-msg">Brak nadchodzących wydarzeń.</div>';
@@ -875,25 +894,43 @@
       container.innerHTML = filtered.map(song => renderSongCardHtml(song)).join('');
     }
 
+    // NAUKA Z GRUPOWANIEM WEDŁUG WYDARZEŃ Z KALENDARZA
     function renderNauka() {
       const container = document.getElementById('naukaList');
-      if (naukaList.length === 0) {
+      if (naukaAssignments.length === 0) {
         container.innerHTML = '<div class="status-msg">Brak utworów w zestawie do nauki.</div>';
         return;
       }
-      container.innerHTML = naukaList.map(song => renderSongCardHtml(song)).join('');
+
+      // Pogrupuj przypisania po wydarzeniach
+      const grouped = {};
+      naukaAssignments.forEach(assign => {
+        const key = `${assign.eventTitle} (${assign.eventDate})`;
+        if (!grouped[key]) grouped[key] = [];
+        const song = allSongs.find(s => s.id === assign.songId);
+        if (song) grouped[key].push(song);
+      });
+
+      let html = '';
+      for (const [eventHeader, songs] of Object.entries(grouped)) {
+        html += `<div class="event-group-header">📅 ${eventHeader}</div><div class="song-grid">`;
+        html += songs.map(song => renderSongCardHtml(song)).join('');
+        html += `</div>`;
+      }
+
+      container.innerHTML = html;
     }
 
     function renderSongCardHtml(song) {
       const inRepertuar = repertuarList.some(s => s.id === song.id);
-      const inNauka = naukaList.some(s => s.id === song.id);
+      const inNauka = naukaAssignments.some(s => s.songId === song.id);
 
       const adminActionsHtml = isAdmin ? `
         <div style="display:flex; gap:4px;" onclick="event.stopPropagation()">
           <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="toggleRepertuar('${song.id}')">
             ${inRepertuar ? '🎼 ✓' : '🎼 +'}
           </button>
-          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="toggleNauka('${song.id}')">
+          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="promptAssignToNauka('${song.id}')">
             ${inNauka ? '🎓 ✓' : '🎓 +'}
           </button>
         </div>
@@ -969,13 +1006,13 @@
         naukaBtn.style.display = 'inline-block';
 
         const inRep = repertuarList.some(s => s.id === song.id);
-        const inNauka = naukaList.some(s => s.id === song.id);
+        const inNauka = naukaAssignments.some(s => s.songId === song.id);
 
         repBtn.innerText = inRep ? '🎼 ✓' : '🎼 +';
         naukaBtn.innerText = inNauka ? '🎓 ✓' : '🎓 +';
 
         repBtn.onclick = () => { toggleRepertuar(song.id); openSongDetail(song.id); };
-        naukaBtn.onclick = () => { toggleNauka(song.id); openSongDetail(song.id); };
+        naukaBtn.onclick = () => { promptAssignToNauka(song.id); openSongDetail(song.id); };
       } else {
         repBtn.style.display = 'none';
         naukaBtn.style.display = 'none';
@@ -1036,7 +1073,7 @@
       }
     });
 
-    // ZARZĄDZANIE REPERTUAREM I NAUKĄ
+    // ZARZĄDZANIE REPERTUAREM
     function toggleRepertuar(songId) {
       if (!isAdmin) return;
       const index = repertuarList.findIndex(s => s.id === songId);
@@ -1050,29 +1087,16 @@
       renderRepertuar();
     }
 
-    function toggleNauka(songId) {
+    function clearRepertuar() {
       if (!isAdmin) return;
-      const index = naukaList.findIndex(s => s.id === songId);
-      if (index > -1) {
-        naukaList.splice(index, 1);
-      } else {
-        const song = allSongs.find(s => s.id === songId);
-        if (song) naukaList.push(song);
-      }
-      localStorage.setItem('naukaList', JSON.stringify(naukaList));
-      renderNauka();
+      repertuarList = [];
+      localStorage.setItem('repertuarList', JSON.stringify([]));
+      renderRepertuar();
     }
 
-    function clearNauka() {
+    function saveRepertuarToArchiwum() {
       if (!isAdmin) return;
-      naukaList = [];
-      localStorage.setItem('naukaList', JSON.stringify([]));
-      renderNauka();
-    }
-
-    function saveNaukaToArchiwum() {
-      if (!isAdmin) return;
-      if (naukaList.length === 0) return alert('Brak utworów w nauce do zapisania!');
+      if (repertuarList.length === 0) return alert('Brak utworów w repertuarze do zapisania!');
       const name = prompt('Nazwa wydarzenia w archiwum (np. Niedziela 10:00 / Ślub):');
       if (!name) return;
 
@@ -1080,12 +1104,70 @@
         id: Date.now(),
         date: new Date().toLocaleDateString('pl-PL'),
         title: name,
-        songs: [...naukaList]
+        songs: [...repertuarList]
       });
 
       localStorage.setItem('archiwumList', JSON.stringify(archiwumList));
-      alert('Zapisano w archiwum!');
+      alert('Repertuar zapisano w archiwum!');
       renderArchiwum();
+    }
+
+    // DO NAUKI - PRZYPISYWANIE DO WYDARZENIA Z KALENDARZA
+    function promptAssignToNauka(songId) {
+      if (!isAdmin) return;
+
+      const existingIndex = naukaAssignments.findIndex(a => a.songId === songId);
+      if (existingIndex > -1) {
+        if (confirm('Ten utwór jest już w nauce. Czy chcesz go usunąć?')) {
+          naukaAssignments.splice(existingIndex, 1);
+          localStorage.setItem('naukaAssignments', JSON.stringify(naukaAssignments));
+          renderNauka();
+          renderBaza();
+          renderRepertuar();
+        }
+        return;
+      }
+
+      const upcomingEvents = getUpcomingCalendarEvents();
+      if (upcomingEvents.length === 0) {
+        alert('Najpierw dodaj przynajmniej jedno nadchodzące wydarzenie w Kalendarzu!');
+        return;
+      }
+
+      let optionsStr = "Wybierz numer wydarzenia, do którego przypisać utwór:\n";
+      upcomingEvents.forEach((ev, idx) => {
+        optionsStr += `${idx + 1}. ${ev.title} (${ev.dateStr})\n`;
+      });
+
+      const choice = prompt(optionsStr);
+      if (!choice) return;
+
+      const selectedIdx = parseInt(choice, 10) - 1;
+      if (isNaN(selectedIdx) || selectedIdx < 0 || selectedIdx >= upcomingEvents.length) {
+        return alert('Nieprawidłowy wybór!');
+      }
+
+      const selEvent = upcomingEvents[selectedIdx];
+      naukaAssignments.push({
+        songId: songId,
+        eventId: selEvent.id,
+        eventTitle: selEvent.title,
+        eventDate: selEvent.dateStr
+      });
+
+      localStorage.setItem('naukaAssignments', JSON.stringify(naukaAssignments));
+      renderNauka();
+      renderBaza();
+      renderRepertuar();
+    }
+
+    function clearNauka() {
+      if (!isAdmin) return;
+      naukaAssignments = [];
+      localStorage.setItem('naukaAssignments', JSON.stringify([]));
+      renderNauka();
+      renderBaza();
+      renderRepertuar();
     }
 
     function renderArchiwum() {
@@ -1104,18 +1186,18 @@
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
             ${item.songs.map(s => s.title).join(' • ')}
           </div>
-          ${isAdmin ? `<button class="btn" onclick="loadArchivedToNauka(${item.id})">Wczytaj do nauki</button>` : ''}
+          ${isAdmin ? `<button class="btn" onclick="loadArchivedToRepertuar(${item.id})">Wczytaj do repertuaru</button>` : ''}
         </div>
       `).join('');
     }
 
-    function loadArchivedToNauka(id) {
+    function loadArchivedToRepertuar(id) {
       if (!isAdmin) return;
       const item = archiwumList.find(a => a.id === id);
       if (item) {
-        naukaList = [...item.songs];
-        localStorage.setItem('naukaList', JSON.stringify(naukaList));
-        switchView('nauka');
+        repertuarList = [...item.songs];
+        localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
+        switchView('repertuar');
       }
     }
 

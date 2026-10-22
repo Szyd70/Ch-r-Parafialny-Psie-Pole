@@ -132,11 +132,12 @@
       margin-bottom: 12px;
     }
 
-    /* FALOWANA PIĘCIOLINIA Z NUTAMI */
+    /* FALOWANA PIĘCIOLINIA ROZCIĄGNIĘTA NA CAŁĄ SZEROKOŚĆ */
     .chorus-graphic {
-      width: 220px;
+      width: 100%;
+      max-width: 100%;
       height: auto;
-      margin: 4px auto 12px;
+      margin: 4px 0 12px 0;
       display: block;
     }
 
@@ -464,32 +465,25 @@
         <h2 class="sub-title-md">Wrocław Psie Pole</h2>
         <div class="tagline">ŚPIEWAJ ZE MNĄ!</div>
 
-        <!-- FALOWANA PIĘCIOLINIA Z NUTAMI (SVG) -->
+        <!-- FALOWANA PIĘCIOLINIA ROZCIĄGNIĘTA NA CAŁĄ SZEROKOŚĆ (SVG) -->
         <svg class="chorus-graphic" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- 5 Falowanych Linii (Pięciolinia) -->
           <path d="M 10 35 Q 80 80, 160 35 T 310 35" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 43 Q 80 88, 160 43 T 310 43" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 51 Q 80 96, 160 51 T 310 51" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 59 Q 80 104, 160 59 T 310 59" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 67 Q 80 112, 160 67 T 310 67" stroke="#111111" stroke-width="2.5" fill="none"/>
 
-          <!-- Pierwsza Nuta (Polićwiertnuta / Ćwierćnuta) -->
+          <!-- Pierwsza Nuta -->
           <g fill="#111111" stroke="#111111">
-            <!-- Głowa nuty -->
             <ellipse cx="118" cy="74" rx="10" ry="7" transform="rotate(-25 118 74)"/>
-            <!-- Laska nuty -->
             <rect x="124" y="28" width="3.5" height="46" rx="1"/>
-            <!-- Chorągiewka -->
             <path d="M 127.5 28 C 137 36, 142 48, 137 60 C 134 50, 130 40, 127.5 35 Z"/>
           </g>
 
-          <!-- Druga Nuta (Wyższa) -->
+          <!-- Druga Nuta -->
           <g fill="#111111" stroke="#111111">
-            <!-- Głowa nuty -->
             <ellipse cx="195" cy="58" rx="10" ry="7" transform="rotate(-25 195 58)"/>
-            <!-- Laska nuty -->
             <rect x="201" y="12" width="3.5" height="46" rx="1"/>
-            <!-- Chorągiewka -->
             <path d="M 204.5 12 C 214 20, 219 32, 214 44 C 211 34, 207 24, 204.5 19 Z"/>
           </g>
         </svg>
@@ -666,6 +660,7 @@
     let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
     let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
 
+    // Domyślnie uruchamiamy aplikację jako zwykły użytkownik (bez autostartu hasła admina)
     let currentUserVoice = localStorage.getItem('userVoice') || 'NONE';
     let isAdmin = false;
     let currentZoom = 1;
@@ -685,30 +680,45 @@
     }
 
     function selectVoice(voice, save = true) {
-      if (voice === 'ADMIN' && !isAdmin) {
-        const pass = prompt('Podaj hasło administratora:');
-        if (pass === '0410') {
-          isAdmin = true;
-          alert('Zalogowano jako Administrator.');
+      if (voice === 'ADMIN') {
+        if (!isAdmin) {
+          const pass = prompt('Podaj hasło administratora:');
+          if (pass === '0410') {
+            isAdmin = true;
+            alert('Zalogowano jako Administrator.');
+          } else {
+            if (pass !== null) alert('Nieprawidłowe hasło!');
+            return; // Przerwano, nie zmieniamy aktywnego przycisku ani trybu
+          }
         } else {
-          if (pass !== null) alert('Nieprawidłowe hasło!');
+          // Jeśli admin był już zalogowany, ponowne kliknięcie w ADMIN wylogowuje go z powrotem do trybu zwykłego użytkownika
+          isAdmin = false;
+          currentUserVoice = 'NONE';
+          if (save) localStorage.setItem('userVoice', currentUserVoice);
+          updateUIPermissions();
           return;
+        }
+      } else {
+        if (currentUserVoice === voice) {
+          currentUserVoice = 'NONE';
+        } else {
+          currentUserVoice = voice;
         }
       }
 
-      if (currentUserVoice === voice && voice !== 'ADMIN') {
-        currentUserVoice = 'NONE';
-      } else {
-        currentUserVoice = voice;
-      }
-
       if (save) localStorage.setItem('userVoice', currentUserVoice);
+      updateUIPermissions();
+    }
 
+    function updateUIPermissions() {
       document.querySelectorAll('.voice-btn').forEach(btn => {
-        if (btn.getAttribute('data-voice') === currentUserVoice) {
-          btn.classList.add('active');
+        const vAttr = btn.getAttribute('data-voice');
+        if (vAttr === 'ADMIN') {
+          if (isAdmin) btn.classList.add('active');
+          else btn.classList.remove('active');
         } else {
-          btn.classList.remove('active');
+          if (vAttr === currentUserVoice) btn.classList.add('active');
+          else btn.classList.remove('active');
         }
       });
 

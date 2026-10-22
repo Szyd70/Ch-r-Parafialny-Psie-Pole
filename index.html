@@ -524,6 +524,10 @@
           <h2 class="section-title">Cała Baza Utworów</h2>
         </div>
 
+        <div id="adminDriveBtn" style="display:none; margin-bottom:12px;">
+          <button class="btn btn-primary" style="width:100%;" onclick="openGoogleDriveFolder()">➕ Dodaj utwór / pliki na Dysk Google</button>
+        </div>
+
         <input type="text" id="searchInput" class="search-box" placeholder="Szukaj w całej bazie..." oninput="renderBaza()" />
         <div id="bazaList" class="song-grid"></div>
       </div>
@@ -612,7 +616,7 @@
 
     let allSongs = [];
     let repertuarList = JSON.parse(localStorage.getItem('repertuarList')) || [];
-    let naukaAssignments = JSON.parse(localStorage.getItem('naukaAssignments')) || []; // [{ songId, eventId, eventTitle, eventDate }]
+    let naukaAssignments = JSON.parse(localStorage.getItem('naukaAssignments')) || [];
     let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
     let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
     let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
@@ -667,11 +671,17 @@
       document.getElementById('adminRepertuarControls').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('adminNaukaControls').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('adminCalendarControls').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('adminDriveBtn').style.display = isAdmin ? 'block' : 'none';
 
       renderRepertuar();
       renderBaza();
       renderNauka();
       renderCalendar();
+      renderArchiwum();
+    }
+
+    function openGoogleDriveFolder() {
+      window.open(`https://drive.google.com/drive/folders/${MAIN_FOLDER_ID}`, '_blank');
     }
 
     function editAnnouncement() {
@@ -894,7 +904,6 @@
       container.innerHTML = filtered.map(song => renderSongCardHtml(song)).join('');
     }
 
-    // NAUKA Z GRUPOWANIEM WEDŁUG WYDARZEŃ Z KALENDARZA
     function renderNauka() {
       const container = document.getElementById('naukaList');
       if (naukaAssignments.length === 0) {
@@ -902,7 +911,6 @@
         return;
       }
 
-      // Pogrupuj przypisania po wydarzeniach
       const grouped = {};
       naukaAssignments.forEach(assign => {
         const key = `${assign.eventTitle} (${assign.eventDate})`;
@@ -1112,7 +1120,7 @@
       renderArchiwum();
     }
 
-    // DO NAUKI - PRZYPISYWANIE DO WYDARZENIA Z KALENDARZA
+    // DO NAUKI
     function promptAssignToNauka(songId) {
       if (!isAdmin) return;
 
@@ -1170,6 +1178,7 @@
       renderRepertuar();
     }
 
+    // ARCHIWUM - RENDERING I USUWANIE
     function renderArchiwum() {
       const container = document.getElementById('archiwumList');
       if (archiwumList.length === 0) {
@@ -1186,9 +1195,21 @@
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
             ${item.songs.map(s => s.title).join(' • ')}
           </div>
-          ${isAdmin ? `<button class="btn" onclick="loadArchivedToRepertuar(${item.id})">Wczytaj do repertuaru</button>` : ''}
+          <div style="display:flex; gap:8px;">
+            ${isAdmin ? `<button class="btn" style="flex:1;" onclick="loadArchivedToRepertuar(${item.id})">Wczytaj do repertuaru</button>` : ''}
+            ${isAdmin ? `<button class="btn" style="color:darkred; border-color:darkred;" onclick="deleteFromArchiwum(${item.id})">Usuń</button>` : ''}
+          </div>
         </div>
       `).join('');
+    }
+
+    function deleteFromArchiwum(id) {
+      if (!isAdmin) return;
+      if (confirm('Czy na pewno chcesz usunąć to wydarzenie z Archiwum?')) {
+        archiwumList = archiwumList.filter(item => item.id !== id);
+        localStorage.setItem('archiwumList', JSON.stringify(archiwumList));
+        renderArchiwum();
+      }
     }
 
     function loadArchivedToRepertuar(id) {

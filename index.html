@@ -22,6 +22,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- Firebase SDK (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --bg-color: #f1f1f1;
@@ -34,12 +38,7 @@
       --shadow-active: 0 2px 3px rgba(0,0,0,0.1);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -62,11 +61,7 @@
       flex-direction: column;
     }
 
-    /* HEADER & VOICE SELECTOR */
-    header {
-      padding: 16px 12px 10px;
-      background-color: #dedede;
-    }
+    header { padding: 16px 12px 10px; background-color: #dedede; }
 
     .voice-buttons-bar {
       display: flex;
@@ -96,43 +91,14 @@
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
     }
 
-    .voice-btn.admin-btn {
-      background-color: var(--accent-red);
-      border-color: #900000;
-    }
-    .voice-btn.admin-btn.active {
-      background-color: #ff1744;
-      border-color: #aa0000;
-    }
+    .voice-btn.admin-btn { background-color: var(--accent-red); border-color: #900000; }
+    .voice-btn.admin-btn.active { background-color: #ff1744; border-color: #aa0000; }
 
-    .header-titles {
-      text-align: center;
-    }
+    .header-titles { text-align: center; }
+    .main-title-lg { font-size: 1.15rem; font-weight: 800; color: #000; margin-bottom: 2px; }
+    .sub-title-md { font-size: 1.05rem; font-weight: 700; color: #222; margin-bottom: 8px; }
+    .tagline { font-size: 0.95rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #333; margin-bottom: 12px; }
 
-    .main-title-lg {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #000;
-      margin-bottom: 2px;
-    }
-
-    .sub-title-md {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #222;
-      margin-bottom: 8px;
-    }
-
-    .tagline {
-      font-size: 0.95rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #333;
-      margin-bottom: 12px;
-    }
-
-    /* FALOWANA PIĘCIOLINIA ROZCIĄGNIĘTA NA CAŁĄ SZEROKOŚĆ */
     .chorus-graphic {
       width: 100%;
       max-width: 100%;
@@ -141,16 +107,10 @@
       display: block;
     }
 
-    /* LAYOUT VIEWS */
-    main { 
-      padding: 16px; 
-      flex: 1;
-    }
-    
+    main { padding: 16px; flex: 1; }
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* TILES GRID */
     .tiles-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -173,15 +133,9 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
 
-    .tile-card:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.12); }
     .tile-card:active { transform: translateY(1px); box-shadow: var(--shadow-active); background-color: #f0f0f0; }
+    .tile-icon { font-size: 1.5rem; color: #111111; }
 
-    .tile-icon {
-      font-size: 1.5rem;
-      color: #111111;
-    }
-
-    /* OGŁOSZENIA BOX */
     .announcements-box {
       border: 2px solid #555555;
       border-radius: 20px;
@@ -197,20 +151,8 @@
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
     }
 
-    .announcements-title {
-      font-size: 0.9rem;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      color: #111;
-      text-transform: uppercase;
-    }
-
-    .announcements-content {
-      font-size: 0.95rem;
-      color: #222;
-      margin-top: 10px;
-      line-height: 1.6;
-    }
+    .announcements-title { font-size: 0.9rem; font-weight: 800; letter-spacing: 1.5px; color: #111; text-transform: uppercase; }
+    .announcements-content { font-size: 0.95rem; color: #222; margin-top: 10px; line-height: 1.6; }
 
     .edit-announcement-btn {
       margin-top: 14px;
@@ -225,7 +167,6 @@
       display: none;
     }
 
-    /* GENERAL BUTTONS & HEADERS */
     .section-header-bar {
       display: flex;
       justify-content: space-between;
@@ -235,11 +176,7 @@
       border-bottom: 1px solid var(--border-color);
     }
 
-    .section-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
+    .section-title { font-size: 1.1rem; font-weight: 800; text-transform: uppercase; }
 
     .btn {
       background-color: #ffffff;
@@ -253,18 +190,9 @@
       transition: all 0.2s ease;
     }
 
-    .btn:active {
-      transform: scale(0.96);
-      background-color: #ccc;
-    }
+    .btn:active { transform: scale(0.96); background-color: #ccc; }
+    .btn-primary { background-color: #222; color: #fff; border-color: #000; }
 
-    .btn-primary {
-      background-color: #222;
-      color: #fff;
-      border-color: #000;
-    }
-
-    /* SEARCH & LISTS */
     .search-box {
       width: 100%;
       padding: 10px;
@@ -277,11 +205,7 @@
       margin-bottom: 12px;
     }
 
-    .song-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .song-grid { display: flex; flex-direction: column; gap: 10px; }
 
     .song-item {
       background-color: #fff;
@@ -294,16 +218,8 @@
       cursor: pointer;
     }
 
-    .song-item-info strong {
-      display: block;
-      font-size: 0.95rem;
-      margin-bottom: 2px;
-    }
-
-    .song-item-info span {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
+    .song-item-info strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
+    .song-item-info span { font-size: 0.75rem; color: var(--text-muted); }
 
     .event-group-header {
       font-size: 0.85rem;
@@ -317,7 +233,6 @@
       border: 1px solid #999;
     }
 
-    /* FORMULARZ KALENDARZA */
     .event-form-card {
       background: #fff;
       border: 1px solid #777;
@@ -337,7 +252,6 @@
       font-size: 0.85rem;
     }
 
-    /* SONG PAGE (FULLSCREEN SUBPAGE) */
     #viewSongDetail {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -368,7 +282,6 @@
       padding: 0 10px;
     }
 
-    /* SHEET MUSIC VIEWER */
     .sheet-container {
       position: relative;
       width: 100%;
@@ -410,7 +323,6 @@
       cursor: pointer;
     }
 
-    /* AUDIO SECTION */
     .audio-box {
       background-color: #f2f2f2;
       border: 1px solid #777;
@@ -427,7 +339,6 @@
     }
     audio { width: 100%; height: 36px; }
 
-    /* LYRICS SECTION */
     .lyrics-box {
       background-color: #f9f9f9;
       border: 1px solid #777;
@@ -465,7 +376,6 @@
         <h2 class="sub-title-md">Wrocław Psie Pole</h2>
         <div class="tagline">ŚPIEWAJ ZE MNĄ!</div>
 
-        <!-- FALOWANA PIĘCIOLINIA ROZCIĄGNIĘTA NA CAŁĄ SZEROKOŚĆ (SVG) -->
         <svg class="chorus-graphic" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M 10 35 Q 80 80, 160 35 T 310 35" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 43 Q 80 88, 160 43 T 310 43" stroke="#111111" stroke-width="2.5" fill="none"/>
@@ -473,14 +383,12 @@
           <path d="M 10 59 Q 80 104, 160 59 T 310 59" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 67 Q 80 112, 160 67 T 310 67" stroke="#111111" stroke-width="2.5" fill="none"/>
 
-          <!-- Pierwsza Nuta -->
           <g fill="#111111" stroke="#111111">
             <ellipse cx="118" cy="74" rx="10" ry="7" transform="rotate(-25 118 74)"/>
             <rect x="124" y="28" width="3.5" height="46" rx="1"/>
             <path d="M 127.5 28 C 137 36, 142 48, 137 60 C 134 50, 130 40, 127.5 35 Z"/>
           </g>
 
-          <!-- Druga Nuta -->
           <g fill="#111111" stroke="#111111">
             <ellipse cx="195" cy="58" rx="10" ry="7" transform="rotate(-25 195 58)"/>
             <rect x="201" y="12" width="3.5" height="46" rx="1"/>
@@ -491,38 +399,26 @@
     </header>
 
     <main>
-      <div id="status" class="status-msg">Ładowanie bazy utworów z Google Drive...</div>
+      <div id="status" class="status-msg">Ładowanie bazy utworów...</div>
 
       <!-- 1. STRONA GŁÓWNA -->
       <div id="viewHome" class="view-section active">
         <div class="tiles-grid">
-          <div class="tile-card" onclick="switchView('repertuar')" title="Bieżący repertuar">
-            <span class="tile-icon">🎼</span>
-          </div>
-          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki">
-            <span class="tile-icon">🎓</span>
-          </div>
-          <div class="tile-card" onclick="switchView('baza')" title="Cała baza utworów / Śpiewnik">
-            <span class="tile-icon">📖</span>
-          </div>
-          <div class="tile-card" onclick="switchView('kalendarz')" title="Kalendarz i spotkania">
-            <span class="tile-icon">📅</span>
-          </div>
-          <div class="tile-card" onclick="switchView('archiwum')" title="Archiwum">
-            <span class="tile-icon">📁</span>
-          </div>
+          <div class="tile-card" onclick="switchView('repertuar')" title="Bieżący repertuar"><span class="tile-icon">🎼</span></div>
+          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki"><span class="tile-icon">🎓</span></div>
+          <div class="tile-card" onclick="switchView('baza')" title="Cała baza utworów / Śpiewnik"><span class="tile-icon">📖</span></div>
+          <div class="tile-card" onclick="switchView('kalendarz')" title="Kalendarz i spotkania"><span class="tile-icon">📅</span></div>
+          <div class="tile-card" onclick="switchView('archiwum')" title="Archiwum"><span class="tile-icon">📁</span></div>
         </div>
 
         <div class="announcements-box">
           <div class="announcements-title">OGŁOSZENIA</div>
-          <div class="announcements-content" id="announcementsContent">
-            Rozpoczynamy nowy sezon chóru parafialnego! Tym razem pragniemy, by przestał być on okazjonalny, dlatego będziemy się spotykać częściej!
-          </div>
+          <div class="announcements-content" id="announcementsContent">Brak ogłoszeń.</div>
           <button class="edit-announcement-btn" id="editAnnouncementBtn" onclick="editAnnouncement()">✏️ Edytuj ogłoszenie</button>
         </div>
       </div>
 
-      <!-- 2. BIEŻĄCY REPERTUAR (NUTY) -->
+      <!-- 2. BIEŻĄCY REPERTUAR -->
       <div id="viewRepertuar" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -539,7 +435,7 @@
         <div id="repertuarList" class="song-grid"></div>
       </div>
 
-      <!-- 3. DO NAUKI (CZAPKA) -->
+      <!-- 3. DO NAUKI -->
       <div id="viewNauka" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -553,7 +449,7 @@
         <div id="naukaList"></div>
       </div>
 
-      <!-- 4. CAŁA BAZA UTWORÓW / ŚPIEWNIK (KSIĄŻKA) -->
+      <!-- 4. CAŁA BAZA UTWORÓW -->
       <div id="viewBaza" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -569,7 +465,7 @@
         <div id="bazaList" class="song-grid"></div>
       </div>
 
-      <!-- 5. KALENDARZ SPOTKAŃ -->
+      <!-- 5. KALENDARZ -->
       <div id="viewKalendarz" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -605,7 +501,7 @@
         <div id="calendarList"></div>
       </div>
 
-      <!-- 6. ARCHIWUM WYDARZEŃ -->
+      <!-- 6. ARCHIWUM -->
       <div id="viewArchiwum" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -650,32 +546,87 @@
   </div>
 
   <script>
+    // --- GOOGLE DRIVE API ---
     const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
     const API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
 
-    let allSongs = [];
-    let repertuarList = JSON.parse(localStorage.getItem('repertuarList')) || [];
-    let naukaAssignments = JSON.parse(localStorage.getItem('naukaAssignments')) || [];
-    let archiwumList = JSON.parse(localStorage.getItem('archiwumList')) || [];
-    let customLyrics = JSON.parse(localStorage.getItem('customLyrics')) || {};
-    let calendarEvents = JSON.parse(localStorage.getItem('calendarEvents')) || [];
+    // --- FIREBASE CONFIGURATION ---
+    const firebaseConfig = {
+      apiKey: API_KEY,
+      authDomain: "spiewnik-chor.firebaseapp.com",
+      databaseURL: "https://spiewnik-chor-default-rtdb.firebaseio.com",
+      projectId: "spiewnik-chor",
+      storageBucket: "spiewnik-chor.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
 
-    // Domyślnie uruchamiamy aplikację jako zwykły użytkownik (bez autostartu hasła admina)
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    // STAN APLIKACJI
+    let allSongs = [];
+    let repertuarList = [];
+    let naukaAssignments = [];
+    let archiwumList = [];
+    let customLyrics = {};
+    let calendarEvents = [];
+    let announcementsText = "Rozpoczynamy nowy sezon chóru parafialnego!";
+
     let currentUserVoice = localStorage.getItem('userVoice') || 'NONE';
     let isAdmin = false;
     let currentZoom = 1;
     let currentSongId = null;
 
+    // --- SYNCHRONIZACJA Z CHMURĄ FIREBASE NA ŻYWO ---
+    function setupCloudSync() {
+      // 1. Ogłoszenia
+      db.ref('announcementsText').on('value', (snapshot) => {
+        if (snapshot.exists()) {
+          announcementsText = snapshot.val();
+          document.getElementById('announcementsContent').innerText = announcementsText;
+        }
+      });
+
+      // 2. Bieżący Repertuar
+      db.ref('repertuarList').on('value', (snapshot) => {
+        repertuarList = snapshot.val() || [];
+        renderRepertuar();
+      });
+
+      // 3. Do Nauki
+      db.ref('naukaAssignments').on('value', (snapshot) => {
+        naukaAssignments = snapshot.val() || [];
+        renderNauka();
+      });
+
+      // 4. Kalendarz
+      db.ref('calendarEvents').on('value', (snapshot) => {
+        calendarEvents = snapshot.val() || [];
+        renderCalendar();
+      });
+
+      // 5. Archiwum
+      db.ref('archiwumList').on('value', (snapshot) => {
+        archiwumList = snapshot.val() || [];
+        renderArchiwum();
+      });
+
+      // 6. Teksty pieśni (Custom Lyrics)
+      db.ref('customLyrics').on('value', (snapshot) => {
+        customLyrics = snapshot.val() || {};
+        if (currentSongId) openSongDetail(currentSongId);
+      });
+    }
+
     function initApp() {
-      const savedAnn = localStorage.getItem('announcementsText');
-      if (savedAnn) {
-        document.getElementById('announcementsContent').innerText = savedAnn;
-      }
-      
       const todayStr = new Date().toISOString().split('T')[0];
       const startDateInput = document.getElementById('evStartDate');
       if (startDateInput) startDateInput.value = todayStr;
 
+      setupCloudSync();
       selectVoice(currentUserVoice, false);
     }
 
@@ -688,10 +639,9 @@
             alert('Zalogowano jako Administrator.');
           } else {
             if (pass !== null) alert('Nieprawidłowe hasło!');
-            return; // Przerwano, nie zmieniamy aktywnego przycisku ani trybu
+            return;
           }
         } else {
-          // Jeśli admin był już zalogowany, ponowne kliknięcie w ADMIN wylogowuje go z powrotem do trybu zwykłego użytkownika
           isAdmin = false;
           currentUserVoice = 'NONE';
           if (save) localStorage.setItem('userVoice', currentUserVoice);
@@ -699,11 +649,8 @@
           return;
         }
       } else {
-        if (currentUserVoice === voice) {
-          currentUserVoice = 'NONE';
-        } else {
-          currentUserVoice = voice;
-        }
+        if (currentUserVoice === voice) currentUserVoice = 'NONE';
+        else currentUserVoice = voice;
       }
 
       if (save) localStorage.setItem('userVoice', currentUserVoice);
@@ -714,11 +661,9 @@
       document.querySelectorAll('.voice-btn').forEach(btn => {
         const vAttr = btn.getAttribute('data-voice');
         if (vAttr === 'ADMIN') {
-          if (isAdmin) btn.classList.add('active');
-          else btn.classList.remove('active');
+          btn.classList.toggle('active', isAdmin);
         } else {
-          if (vAttr === currentUserVoice) btn.classList.add('active');
-          else btn.classList.remove('active');
+          btn.classList.toggle('active', vAttr === currentUserVoice);
         }
       });
 
@@ -741,15 +686,13 @@
 
     function editAnnouncement() {
       if (!isAdmin) return;
-      const current = document.getElementById('announcementsContent').innerText;
-      const newText = prompt('Wpisz treść ogłoszenia:', current);
+      const newText = prompt('Wpisz treść ogłoszenia:', announcementsText);
       if (newText !== null) {
-        document.getElementById('announcementsContent').innerText = newText;
-        localStorage.setItem('announcementsText', newText);
+        db.ref('announcementsText').set(newText);
       }
     }
 
-    // --- LOGIKA KALENDARZA ---
+    // --- KALENDARZ ---
     function toggleCalendarForm() {
       const card = document.getElementById('calendarFormCard');
       card.style.display = card.style.display === 'none' ? 'flex' : 'none';
@@ -763,9 +706,7 @@
       const recurrenceWeeks = document.getElementById('evRecurrence').value;
       const desc = document.getElementById('evDesc').value.trim();
 
-      if (!title || !startDateStr) {
-        return alert('Wpisz tytuł oraz wybierz datę startową!');
-      }
+      if (!title || !startDateStr) return alert('Wpisz tytuł oraz wybierz datę startową!');
 
       let generatedDates = [];
       let currentDate = new Date(startDateStr);
@@ -782,18 +723,11 @@
       }
 
       generatedDates.forEach(dStr => {
-        calendarEvents.push({
-          id: Date.now() + Math.random(),
-          title,
-          dateStr: dStr,
-          time,
-          desc
-        });
+        calendarEvents.push({ id: Date.now() + Math.random(), title, dateStr: dStr, time, desc });
       });
 
-      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
+      db.ref('calendarEvents').set(calendarEvents);
       toggleCalendarForm();
-      renderCalendar();
     }
 
     function getUpcomingCalendarEvents() {
@@ -813,22 +747,14 @@
       }
 
       container.innerHTML = sortedEvents.map(ev => {
-        const formattedDate = new Date(ev.dateStr).toLocaleDateString('pl-PL', {
-          weekday: 'short',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        });
-
+        const formattedDate = new Date(ev.dateStr).toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
         return `
           <div style="background:#fff; border:1px solid #777; padding:12px 14px; border-radius:8px; margin-bottom:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
               <strong style="font-size:0.95rem;">${ev.title}</strong>
               <span style="font-size:0.8rem; font-weight:700; background:#eee; padding:2px 6px; border-radius:4px;">${ev.time || ''}</span>
             </div>
-            <div style="font-size:0.82rem; color:#222; font-weight:600; margin-bottom:4px;">
-              📅 ${formattedDate}
-            </div>
+            <div style="font-size:0.82rem; color:#222; font-weight:600; margin-bottom:4px;">📅 ${formattedDate}</div>
             <div style="font-size:0.8rem; color:#555;">${ev.desc || ''}</div>
             ${isAdmin ? `<button class="btn" style="margin-top:8px; font-size:0.68rem; color:darkred; padding:3px 8px;" onclick="deleteCalendarEvent(${ev.id})">Usuń</button>` : ''}
           </div>
@@ -839,20 +765,17 @@
     function deleteCalendarEvent(id) {
       if (!isAdmin) return;
       calendarEvents = calendarEvents.filter(e => e.id !== id);
-      localStorage.setItem('calendarEvents', JSON.stringify(calendarEvents));
-      renderCalendar();
+      db.ref('calendarEvents').set(calendarEvents);
     }
 
-    // POBIERANIE KATALOGU Z GOOGLE DRIVE
+    // --- GOOGLE DRIVE CATALOG ---
     async function loadCatalog() {
       const statusEl = document.getElementById('status');
       statusEl.style.display = 'block';
 
-      const cacheBuster = `&_cb=${Date.now()}`;
-      
       try {
         const folderQuery = `'${MAIN_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`;
-        const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${API_KEY}${cacheBuster}`;
+        const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${API_KEY}`;
 
         const folderRes = await fetch(folderUrl, { cache: 'no-store' });
         if (!folderRes.ok) throw new Error('Błąd połączenia');
@@ -864,7 +787,7 @@
 
         for (const folder of songFolders) {
           const filesQuery = `'${folder.id}' in parents and trashed = false`;
-          const filesUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(filesQuery)}&fields=files(id,name,mimeType)&pageSize=50&key=${API_KEY}${cacheBuster}`;
+          const filesUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(filesQuery)}&fields=files(id,name,mimeType)&pageSize=50&key=${API_KEY}`;
 
           const filesRes = await fetch(filesUrl, { cache: 'no-store' });
           if (filesRes.ok) {
@@ -875,21 +798,14 @@
         }
 
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
-
-        if (repertuarList.length === 0) {
-          repertuarList = [...allSongs];
-          localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
-        }
-
         statusEl.style.display = 'none';
-        
+
         renderRepertuar();
         renderBaza();
         renderNauka();
-        renderArchiwum();
       } catch (err) {
         console.error('Błąd:', err);
-        statusEl.innerText = 'Błąd podczas ładowania bazy utworów.';
+        statusEl.innerText = 'Błąd podczas ładowania bazy utworów z Drive.';
       }
     }
 
@@ -921,13 +837,7 @@
         }
       }
 
-      return {
-        id: folderId,
-        title: folderName,
-        sheetUrl,
-        audioTracks,
-        lyricsText
-      };
+      return { id: folderId, title: folderName, sheetUrl, audioTracks, lyricsText };
     }
 
     function getVoiceLabel(v) {
@@ -940,7 +850,7 @@
       }
     }
 
-    // RENDERING WIDOKÓW
+    // WIDOKI
     function renderRepertuar() {
       const container = document.getElementById('repertuarList');
       const searchEl = document.getElementById('searchRepertuarInput');
@@ -990,12 +900,8 @@
 
       const adminActionsHtml = isAdmin ? `
         <div style="display:flex; gap:4px;" onclick="event.stopPropagation()">
-          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="toggleRepertuar('${song.id}')">
-            ${inRepertuar ? '🎼 ✓' : '🎼 +'}
-          </button>
-          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="promptAssignToNauka('${song.id}')">
-            ${inNauka ? '🎓 ✓' : '🎓 +'}
-          </button>
+          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="toggleRepertuar('${song.id}')">${inRepertuar ? '🎼 ✓' : '🎼 +'}</button>
+          <button class="btn" style="font-size:0.7rem; padding:4px 8px;" onclick="promptAssignToNauka('${song.id}')">${inNauka ? '🎓 ✓' : '🎓 +'}</button>
         </div>
       ` : '';
 
@@ -1003,14 +909,14 @@
         <div class="song-item" onclick="openSongDetail('${song.id}')">
           <div class="song-item-info">
             <strong>${song.title.toUpperCase()}</strong>
-            <span>Nagrania: ${song.audioTracks.length} ścieżki</span>
+            <span>Nagrania: ${song.audioTracks ? song.audioTracks.length : 0} ścieżki</span>
           </div>
           ${adminActionsHtml}
         </div>
       `;
     }
 
-    // OTWIERANIE PODSTRONY UTWORU
+    // UTWÓR SZCZEGÓŁY
     function openSongDetail(songId) {
       currentSongId = songId;
       const song = allSongs.find(s => s.id === songId);
@@ -1019,18 +925,14 @@
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
 
       const sheetImg = document.getElementById('detailSheet');
-      if (song.sheetUrl) {
-        sheetImg.src = song.sheetUrl;
-        sheetImg.style.display = 'block';
-      } else {
-        sheetImg.style.display = 'none';
-      }
+      sheetImg.src = song.sheetUrl || '';
+      sheetImg.style.display = song.sheetUrl ? 'block' : 'none';
       resetZoom();
 
       const audioSec = document.getElementById('detailAudioSection');
       const audioListEl = document.getElementById('detailAudioList');
 
-      const filteredAudio = song.audioTracks.filter(track => {
+      const filteredAudio = (song.audioTracks || []).filter(track => {
         if (currentUserVoice === 'NONE' || currentUserVoice === 'ADMIN' || !currentUserVoice) return true;
         return track.voice === 'TUTTI' || track.voice === currentUserVoice;
       });
@@ -1093,15 +995,17 @@
     function editSongLyrics() {
       if (!isAdmin || !currentSongId) return;
       const currentText = customLyrics[currentSongId] || '';
-      const newText = prompt('Wpisz lub edytuj tekst pieśni:', currentText);
+      const newText = prompt('Wpisz lub edytuj tekst pieśni (zostaw puste, aby przywrócić domyślny):', currentText);
       if (newText !== null) {
-        customLyrics[currentSongId] = newText;
-        localStorage.setItem('customLyrics', JSON.stringify(customLyrics));
-        openSongDetail(currentSongId);
+        if (newText.trim() === '') {
+          db.ref(`customLyrics/${currentSongId}`).remove();
+        } else {
+          db.ref(`customLyrics/${currentSongId}`).set(newText);
+        }
       }
     }
 
-    // PINCH TO ZOOM
+    // ZOOM
     function zoomSheet(delta) {
       currentZoom = Math.max(0.8, Math.min(3, currentZoom + delta));
       document.getElementById('detailSheet').style.transform = `scale(${currentZoom})`;
@@ -1112,31 +1016,7 @@
       document.getElementById('detailSheet').style.transform = 'scale(1)';
     }
 
-    let initialDist = 0;
-    const sheetContainer = document.getElementById('sheetContainer');
-
-    sheetContainer.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 2) {
-        initialDist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-      }
-    });
-
-    sheetContainer.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 2 && initialDist > 0) {
-        const dist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-        const factor = dist / initialDist;
-        zoomSheet((factor - 1) * 0.1);
-        initialDist = dist;
-      }
-    });
-
-    // ZARZĄDZANIE REPERTUAREM
+    // ZARZĄDZANIE W CHMURZE (FIREBASE)
     function toggleRepertuar(songId) {
       if (!isAdmin) return;
       const index = repertuarList.findIndex(s => s.id === songId);
@@ -1146,15 +1026,12 @@
         const song = allSongs.find(s => s.id === songId);
         if (song) repertuarList.push(song);
       }
-      localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
-      renderRepertuar();
+      db.ref('repertuarList').set(repertuarList);
     }
 
     function clearRepertuar() {
       if (!isAdmin) return;
-      repertuarList = [];
-      localStorage.setItem('repertuarList', JSON.stringify([]));
-      renderRepertuar();
+      db.ref('repertuarList').set([]);
     }
 
     function saveRepertuarToArchiwum() {
@@ -1170,12 +1047,10 @@
         songs: [...repertuarList]
       });
 
-      localStorage.setItem('archiwumList', JSON.stringify(archiwumList));
-      alert('Repertuar zapisano w archiwum!');
-      renderArchiwum();
+      db.ref('archiwumList').set(archiwumList);
+      alert('Repertuar zapisano w archiwum w chmurze!');
     }
 
-    // DO NAUKI
     function promptAssignToNauka(songId) {
       if (!isAdmin) return;
 
@@ -1183,10 +1058,7 @@
       if (existingIndex > -1) {
         if (confirm('Ten utwór jest już w nauce. Czy chcesz go usunąć?')) {
           naukaAssignments.splice(existingIndex, 1);
-          localStorage.setItem('naukaAssignments', JSON.stringify(naukaAssignments));
-          renderNauka();
-          renderBaza();
-          renderRepertuar();
+          db.ref('naukaAssignments').set(naukaAssignments);
         }
         return;
       }
@@ -1218,22 +1090,14 @@
         eventDate: selEvent.dateStr
       });
 
-      localStorage.setItem('naukaAssignments', JSON.stringify(naukaAssignments));
-      renderNauka();
-      renderBaza();
-      renderRepertuar();
+      db.ref('naukaAssignments').set(naukaAssignments);
     }
 
     function clearNauka() {
       if (!isAdmin) return;
-      naukaAssignments = [];
-      localStorage.setItem('naukaAssignments', JSON.stringify([]));
-      renderNauka();
-      renderBaza();
-      renderRepertuar();
+      db.ref('naukaAssignments').set([]);
     }
 
-    // ARCHIWUM
     function renderArchiwum() {
       const container = document.getElementById('archiwumList');
       if (archiwumList.length === 0) {
@@ -1248,7 +1112,7 @@
             <small style="color:var(--text-muted);">${item.date}</small>
           </div>
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
-            ${item.songs.map(s => s.title).join(' • ')}
+            ${(item.songs || []).map(s => s.title).join(' • ')}
           </div>
           <div style="display:flex; gap:8px;">
             ${isAdmin ? `<button class="btn" style="flex:1;" onclick="loadArchivedToRepertuar(${item.id})">Wczytaj do repertuaru</button>` : ''}
@@ -1262,8 +1126,7 @@
       if (!isAdmin) return;
       if (confirm('Czy na pewno chcesz usunąć to wydarzenie z Archiwum?')) {
         archiwumList = archiwumList.filter(item => item.id !== id);
-        localStorage.setItem('archiwumList', JSON.stringify(archiwumList));
-        renderArchiwum();
+        db.ref('archiwumList').set(archiwumList);
       }
     }
 
@@ -1271,34 +1134,17 @@
       if (!isAdmin) return;
       const item = archiwumList.find(a => a.id === id);
       if (item) {
-        repertuarList = [...item.songs];
-        localStorage.setItem('repertuarList', JSON.stringify(repertuarList));
+        repertuarList = [...(item.songs || [])];
+        db.ref('repertuarList').set(repertuarList);
         switchView('repertuar');
       }
     }
 
-    // SWITCH VIEWS
+    // NAWIGACJA
     function switchView(viewName) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-
-      if (viewName === 'home') {
-        document.getElementById('viewHome').classList.add('active');
-      } else if (viewName === 'repertuar') {
-        document.getElementById('viewRepertuar').classList.add('active');
-        renderRepertuar();
-      } else if (viewName === 'nauka') {
-        document.getElementById('viewNauka').classList.add('active');
-        renderNauka();
-      } else if (viewName === 'baza') {
-        document.getElementById('viewBaza').classList.add('active');
-        renderBaza();
-      } else if (viewName === 'kalendarz') {
-        document.getElementById('viewKalendarz').classList.add('active');
-        renderCalendar();
-      } else if (viewName === 'archiwum') {
-        document.getElementById('viewArchiwum').classList.add('active');
-        renderArchiwum();
-      }
+      const activeEl = document.getElementById('view' + viewName.charAt(0).toUpperCase() + viewName.slice(1));
+      if (activeEl) activeEl.classList.add('active');
     }
 
     // START
@@ -1306,7 +1152,6 @@
     loadCatalog();
   </script>
 
-  <!-- REGISTRACJA SERVICE WORKERA -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

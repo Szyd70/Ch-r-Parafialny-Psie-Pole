@@ -22,10 +22,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Firebase SDK (Compat Version) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
   <style>
     :root {
       --bg-color: #f1f1f1;
@@ -653,23 +649,24 @@
     </div>
   </div>
 
-  <!-- Firebase SDK (Compat Version) -->
+  <!-- Firebase SDKs (Compat Version) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
     const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
-    const API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
+    const API_KEY = 'AIzaSyCa7IeaO36b7XBJA723CC4zJAjI6BgP5wQ';
 
-    // Konfiguracja Firebase Realtime Database
+    // Nowa konfiguracja Firebase (chor-psie-pole)
     const firebaseConfig = {
       apiKey: API_KEY,
-      authDomain: "spiewnik-chor.firebaseapp.com",
-      databaseURL: "https://spiewnik-chor-default-rtdb.firebaseio.com",
-      projectId: "spiewnik-chor",
-      storageBucket: "spiewnik-chor.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef123456"
+      authDomain: "chor-psie-pole.firebaseapp.com",
+      databaseURL: "https://chor-psie-pole-default-rtdb.firebaseio.com",
+      projectId: "chor-psie-pole",
+      storageBucket: "chor-psie-pole.firebasestorage.app",
+      messagingSenderId: "493515214319",
+      appId: "1:493515214319:web:64cd86073792c1ce313a1a",
+      measurementId: "G-D4S4YC3DGG"
     };
 
     if (!firebase.apps.length) {
@@ -691,38 +688,32 @@
 
     // --- SYNCHRONIZACJA Z FIREBASE W CZASIE RZECZYWISTYM ---
     function setupCloudSync() {
-      // 1. Ogłoszenia
       db.ref('announcementsText').on('value', (snapshot) => {
         if (snapshot.exists()) {
           document.getElementById('announcementsContent').innerText = snapshot.val();
         }
       });
 
-      // 2. Bieżący Repertuar
       db.ref('repertuarList').on('value', (snapshot) => {
         repertuarList = snapshot.val() || [];
         renderRepertuar();
       });
 
-      // 3. Do Nauki
       db.ref('naukaAssignments').on('value', (snapshot) => {
         naukaAssignments = snapshot.val() || [];
         renderNauka();
       });
 
-      // 4. Kalendarz
       db.ref('calendarEvents').on('value', (snapshot) => {
         calendarEvents = snapshot.val() || [];
         renderCalendar();
       });
 
-      // 5. Archiwum
       db.ref('archiwumList').on('value', (snapshot) => {
         archiwumList = snapshot.val() || [];
         renderArchiwum();
       });
 
-      // 6. Teksty pieśni
       db.ref('customLyrics').on('value', (snapshot) => {
         customLyrics = snapshot.val() || {};
         if (currentSongId) openSongDetail(currentSongId);
@@ -929,7 +920,6 @@
 
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
 
-        // Jeśli repertuar w chmurze jest pusty przy pierwszym uruchomieniu, zainicjalizuj go całą bazą
         if (repertuarList.length === 0 && isAdmin) {
           repertuarList = [...allSongs];
           db.ref('repertuarList').set(repertuarList);

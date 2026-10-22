@@ -445,30 +445,27 @@
       background: #f7f7f7;
       border: 1px solid #777;
       border-radius: 8px;
-      padding: 8px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
 
-    .pitch-row {
+    /* Układ klawiatury fortepianowej w siatce 14-kolumnowej */
+    .piano-keyboard-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-
-    .pitch-row-accidentals {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
-      padding: 0 5%;
+      grid-template-columns: repeat(14, 1fr);
+      gap: 2px;
+      width: 100%;
     }
 
     .pitch-btn {
-      padding: 8px 2px;
+      padding: 10px 2px;
       font-size: 0.75rem;
       font-weight: 700;
       text-align: center;
+      border-radius: 4px;
+      width: 100%;
     }
   </style>
 </head>
@@ -639,25 +636,29 @@
       </div>
     </div>
 
-    <!-- PANEL INTONACJI / KAMERTONU (Środkowa oktawa: 12 tonów z półtonami, auto-stop po 1s) -->
+    <!-- PANEL INTONACJI / KAMERTONU (Pianino: układy klawiszy 2+3, czarne tło dla półtonów, jasne tło dla A) -->
     <div id="pitchPanel" class="pitch-panel" style="display:none;">
-      <!-- Półtony (czarne klawisze) -->
-      <div class="pitch-row-accidentals">
-        <button class="btn btn-black pitch-btn" onclick="playTone(277.18)">C#</button>
-        <button class="btn btn-black pitch-btn" onclick="playTone(311.13)">D#</button>
-        <button class="btn btn-black pitch-btn" onclick="playTone(369.99)">F#</button>
-        <button class="btn btn-black pitch-btn" onclick="playTone(415.30)">G#</button>
-        <button class="btn btn-black pitch-btn" onclick="playTone(466.16)">A#</button>
+      <!-- Rząd czarnych klawiszy (grupowanie po 2 i 3 półtony) -->
+      <div class="piano-keyboard-grid">
+        <div style="grid-column: span 1;"></div>
+        <button class="btn btn-black pitch-btn" style="grid-column: span 2;" onclick="playTone(277.18)">C#</button>
+        <button class="btn btn-black pitch-btn" style="grid-column: span 2;" onclick="playTone(311.13)">D#</button>
+        <div style="grid-column: span 2;"></div>
+        <button class="btn btn-black pitch-btn" style="grid-column: span 2;" onclick="playTone(369.99)">F#</button>
+        <button class="btn btn-black pitch-btn" style="grid-column: span 2;" onclick="playTone(415.30)">G#</button>
+        <button class="btn btn-black pitch-btn" style="grid-column: span 2;" onclick="playTone(466.16)">A#</button>
+        <div style="grid-column: span 1;"></div>
       </div>
-      <!-- Dźwięki podstawowe (białe klawisze) -->
-      <div class="pitch-row">
-        <button class="btn pitch-btn" onclick="playTone(261.63)">C</button>
-        <button class="btn pitch-btn" onclick="playTone(293.66)">D</button>
-        <button class="btn pitch-btn" onclick="playTone(329.63)">E</button>
-        <button class="btn pitch-btn" onclick="playTone(349.23)">F</button>
-        <button class="btn pitch-btn" onclick="playTone(392.00)">G</button>
-        <button class="btn btn-primary pitch-btn" onclick="playTone(440.00)" title="Kamerton A4">A</button>
-        <button class="btn pitch-btn" onclick="playTone(493.88)">H</button>
+
+      <!-- Rząd białych klawiszy (wszystkie jasne) -->
+      <div class="piano-keyboard-grid">
+        <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(261.63)">C</button>
+        <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(293.66)">D</button>
+        <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(329.63)">E</button>
+        <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(349.23)">F</button>
+        <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(392.00)">G</button>
+        <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(440.00)">A</button>
+        <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(493.88)">H</button>
       </div>
     </div>
 
@@ -1133,7 +1134,7 @@
 
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
 
-      // Domyślnie schowaj panel intonacji przy otwarciu nowego utworu
+      // Domyślnie ukryj panel intonacji po otwarciu
       document.getElementById('pitchPanel').style.display = 'none';
 
       const sheetImg = document.getElementById('detailSheet');

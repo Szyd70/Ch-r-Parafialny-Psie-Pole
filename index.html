@@ -62,7 +62,6 @@
       flex-direction: column;
     }
 
-    /* HEADER & VOICE SELECTOR */
     header {
       padding: 16px 12px 10px;
       background-color: #dedede;
@@ -132,7 +131,6 @@
       margin-bottom: 12px;
     }
 
-    /* FALOWANA PIĘCIOLINIA ROZCIĄGNIĘTA NA CAŁĄ SZEROKOŚĆ */
     .chorus-graphic {
       width: 100%;
       max-width: 100%;
@@ -141,7 +139,6 @@
       display: block;
     }
 
-    /* LAYOUT VIEWS */
     main { 
       padding: 16px; 
       flex: 1;
@@ -150,7 +147,6 @@
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* TILES GRID */
     .tiles-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -181,7 +177,6 @@
       color: #111111;
     }
 
-    /* OGŁOSZENIA BOX */
     .announcements-box {
       border: 2px solid #555555;
       border-radius: 20px;
@@ -225,7 +220,6 @@
       display: none;
     }
 
-    /* GENERAL BUTTONS & HEADERS */
     .section-header-bar {
       display: flex;
       justify-content: space-between;
@@ -264,7 +258,6 @@
       border-color: #000;
     }
 
-    /* SEARCH & LISTS */
     .search-box {
       width: 100%;
       padding: 10px;
@@ -317,7 +310,6 @@
       border: 1px solid #999;
     }
 
-    /* FORMULARZ KALENDARZA */
     .event-form-card {
       background: #fff;
       border: 1px solid #777;
@@ -337,7 +329,6 @@
       font-size: 0.85rem;
     }
 
-    /* SONG PAGE (FULLSCREEN SUBPAGE) */
     #viewSongDetail {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -368,7 +359,6 @@
       padding: 0 10px;
     }
 
-    /* SHEET MUSIC VIEWER */
     .sheet-container {
       position: relative;
       width: 100%;
@@ -410,7 +400,6 @@
       cursor: pointer;
     }
 
-    /* AUDIO SECTION */
     .audio-box {
       background-color: #f2f2f2;
       border: 1px solid #777;
@@ -427,7 +416,6 @@
     }
     audio { width: 100%; height: 36px; }
 
-    /* LYRICS SECTION */
     .lyrics-box {
       background-color: #f9f9f9;
       border: 1px solid #777;
@@ -465,7 +453,6 @@
         <h2 class="sub-title-md">Wrocław Psie Pole</h2>
         <div class="tagline">ŚPIEWAJ ZE MNĄ!</div>
 
-        <!-- FALOWANA PIĘCIOLINIA ROZCIĄGNIĘTA NA CAŁĄ SZEROKOŚĆ (SVG) -->
         <svg class="chorus-graphic" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M 10 35 Q 80 80, 160 35 T 310 35" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 43 Q 80 88, 160 43 T 310 43" stroke="#111111" stroke-width="2.5" fill="none"/>
@@ -473,14 +460,12 @@
           <path d="M 10 59 Q 80 104, 160 59 T 310 59" stroke="#111111" stroke-width="2.5" fill="none"/>
           <path d="M 10 67 Q 80 112, 160 67 T 310 67" stroke="#111111" stroke-width="2.5" fill="none"/>
 
-          <!-- Pierwsza Nuta -->
           <g fill="#111111" stroke="#111111">
             <ellipse cx="118" cy="74" rx="10" ry="7" transform="rotate(-25 118 74)"/>
             <rect x="124" y="28" width="3.5" height="46" rx="1"/>
             <path d="M 127.5 28 C 137 36, 142 48, 137 60 C 134 50, 130 40, 127.5 35 Z"/>
           </g>
 
-          <!-- Druga Nuta -->
           <g fill="#111111" stroke="#111111">
             <ellipse cx="195" cy="58" rx="10" ry="7" transform="rotate(-25 195 58)"/>
             <rect x="201" y="12" width="3.5" height="46" rx="1"/>
@@ -496,33 +481,21 @@
       <!-- 1. STRONA GŁÓWNA -->
       <div id="viewHome" class="view-section active">
         <div class="tiles-grid">
-          <div class="tile-card" onclick="switchView('repertuar')" title="Bieżący repertuar">
-            <span class="tile-icon">🎼</span>
-          </div>
-          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki">
-            <span class="tile-icon">🎓</span>
-          </div>
-          <div class="tile-card" onclick="switchView('baza')" title="Cała baza utworów / Śpiewnik">
-            <span class="tile-icon">📖</span>
-          </div>
-          <div class="tile-card" onclick="switchView('kalendarz')" title="Kalendarz i spotkania">
-            <span class="tile-icon">📅</span>
-          </div>
-          <div class="tile-card" onclick="switchView('archiwum')" title="Archiwum">
-            <span class="tile-icon">📁</span>
-          </div>
+          <div class="tile-card" onclick="switchView('repertuar')" title="Bieżący repertuar"><span class="tile-icon">🎼</span></div>
+          <div class="tile-card" onclick="switchView('nauka')" title="Do nauki"><span class="tile-icon">🎓</span></div>
+          <div class="tile-card" onclick="switchView('baza')" title="Cała baza utworów / Śpiewnik"><span class="tile-icon">📖</span></div>
+          <div class="tile-card" onclick="switchView('kalendarz')" title="Kalendarz i spotkania"><span class="tile-icon">📅</span></div>
+          <div class="tile-card" onclick="switchView('archiwum')" title="Archiwum"><span class="tile-icon">📁</span></div>
         </div>
 
         <div class="announcements-box">
           <div class="announcements-title">OGŁOSZENIA</div>
-          <div class="announcements-content" id="announcementsContent">
-            Rozpoczynamy nowy sezon chóru parafialnego! Tym razem pragniemy, by przestał być on okazjonalny, dlatego będziemy się spotykać częściej!
-          </div>
+          <div class="announcements-content" id="announcementsContent">Rozpoczynamy nowy sezon chóru parafialnego!</div>
           <button class="edit-announcement-btn" id="editAnnouncementBtn" onclick="editAnnouncement()">✏️ Edytuj ogłoszenie</button>
         </div>
       </div>
 
-      <!-- 2. BIEŻĄCY REPERTUAR (NUTY) -->
+      <!-- 2. BIEŻĄCY REPERTUAR -->
       <div id="viewRepertuar" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -539,7 +512,7 @@
         <div id="repertuarList" class="song-grid"></div>
       </div>
 
-      <!-- 3. DO NAUKI (CZAPKA) -->
+      <!-- 3. DO NAUKI -->
       <div id="viewNauka" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -553,7 +526,7 @@
         <div id="naukaList"></div>
       </div>
 
-      <!-- 4. CAŁA BAZA UTWORÓW / ŚPIEWNIK (KSIĄŻKA) -->
+      <!-- 4. CAŁA BAZA UTWORÓW -->
       <div id="viewBaza" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -569,7 +542,7 @@
         <div id="bazaList" class="song-grid"></div>
       </div>
 
-      <!-- 5. KALENDARZ SPOTKAŃ -->
+      <!-- 5. KALENDARZ -->
       <div id="viewKalendarz" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -605,7 +578,7 @@
         <div id="calendarList"></div>
       </div>
 
-      <!-- 6. ARCHIWUM WYDARZEŃ -->
+      <!-- 6. ARCHIWUM -->
       <div id="viewArchiwum" class="view-section">
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
@@ -654,12 +627,13 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
+    // 1. KLUCZ DLA GOOGLE DRIVE API (Pierwotny, działający do pobierania nut/audio)
+    const DRIVE_API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
     const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
-    const API_KEY = 'AIzaSyCa7IeaO36b7XBJA723CC4zJAjI6BgP5wQ';
 
-    // Nowa konfiguracja Firebase (chor-psie-pole)
+    // 2. KLUCZ I KONFIGURACJA DLA FIREBASE (chor-psie-pole)
     const firebaseConfig = {
-      apiKey: API_KEY,
+      apiKey: "AIzaSyCa7IeaO36b7XBJA723CC4zJAjI6BgP5wQ",
       authDomain: "chor-psie-pole.firebaseapp.com",
       databaseURL: "https://chor-psie-pole-default-rtdb.firebaseio.com",
       projectId: "chor-psie-pole",
@@ -686,7 +660,6 @@
     let currentZoom = 1;
     let currentSongId = null;
 
-    // --- SYNCHRONIZACJA Z FIREBASE W CZASIE RZECZYWISTYM ---
     function setupCloudSync() {
       db.ref('announcementsText').on('value', (snapshot) => {
         if (snapshot.exists()) {
@@ -795,7 +768,6 @@
       }
     }
 
-    // --- LOGIKA KALENDARZA ---
     function toggleCalendarForm() {
       const card = document.getElementById('calendarFormCard');
       card.style.display = card.style.display === 'none' ? 'flex' : 'none';
@@ -887,7 +859,7 @@
       db.ref('calendarEvents').set(calendarEvents);
     }
 
-    // POBIERANIE KATALOGU Z GOOGLE DRIVE
+    // POBIERANIE Z GOOGLE DRIVE PRZY UŻYCIU DEDYKOWANEGO DRIVE_API_KEY
     async function loadCatalog() {
       const statusEl = document.getElementById('status');
       statusEl.style.display = 'block';
@@ -896,10 +868,10 @@
       
       try {
         const folderQuery = `'${MAIN_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`;
-        const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${API_KEY}${cacheBuster}`;
+        const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${DRIVE_API_KEY}${cacheBuster}`;
 
         const folderRes = await fetch(folderUrl, { cache: 'no-store' });
-        if (!folderRes.ok) throw new Error('Błąd połączenia');
+        if (!folderRes.ok) throw new Error('Błąd połączenia z Google Drive');
 
         const folderData = await folderRes.json();
         const songFolders = folderData.files || [];
@@ -908,7 +880,7 @@
 
         for (const folder of songFolders) {
           const filesQuery = `'${folder.id}' in parents and trashed = false`;
-          const filesUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(filesQuery)}&fields=files(id,name,mimeType)&pageSize=50&key=${API_KEY}${cacheBuster}`;
+          const filesUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(filesQuery)}&fields=files(id,name,mimeType)&pageSize=50&key=${DRIVE_API_KEY}${cacheBuster}`;
 
           const filesRes = await fetch(filesUrl, { cache: 'no-store' });
           if (filesRes.ok) {
@@ -920,11 +892,6 @@
 
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
 
-        if (repertuarList.length === 0 && isAdmin) {
-          repertuarList = [...allSongs];
-          db.ref('repertuarList').set(repertuarList);
-        }
-
         statusEl.style.display = 'none';
         
         renderRepertuar();
@@ -932,8 +899,8 @@
         renderNauka();
         renderArchiwum();
       } catch (err) {
-        console.error('Błąd:', err);
-        statusEl.innerText = 'Błąd podczas ładowania bazy utworów.';
+        console.error('Błąd Drive:', err);
+        statusEl.innerText = 'Błąd podczas ładowania bazy utworów z Google Drive.';
       }
     }
 
@@ -943,7 +910,7 @@
       let audioTracks = [];
 
       for (const file of files) {
-        const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${API_KEY}`;
+        const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${DRIVE_API_KEY}`;
 
         if (file.mimeType.includes('image/')) {
           sheetUrl = streamUrl;
@@ -984,7 +951,6 @@
       }
     }
 
-    // RENDERING WIDOKÓW
     function renderRepertuar() {
       const container = document.getElementById('repertuarList');
       const searchEl = document.getElementById('searchRepertuarInput');
@@ -1054,7 +1020,6 @@
       `;
     }
 
-    // OTWIERANIE PODSTRONY UTWORU
     function openSongDetail(songId) {
       currentSongId = songId;
       const song = allSongs.find(s => s.id === songId);
@@ -1147,7 +1112,6 @@
       }
     }
 
-    // PINCH TO ZOOM
     function zoomSheet(delta) {
       currentZoom = Math.max(0.8, Math.min(3, currentZoom + delta));
       document.getElementById('detailSheet').style.transform = `scale(${currentZoom})`;
@@ -1182,7 +1146,6 @@
       }
     });
 
-    // ZARZĄDZANIE REPERTUAREM (FIREBASE)
     function toggleRepertuar(songId) {
       if (!isAdmin) return;
       const index = repertuarList.findIndex(s => s.id === songId);
@@ -1217,7 +1180,6 @@
       alert('Repertuar zapisano w archiwum w chmurze!');
     }
 
-    // DO NAUKI (FIREBASE)
     function promptAssignToNauka(songId) {
       if (!isAdmin) return;
 
@@ -1265,7 +1227,6 @@
       db.ref('naukaAssignments').set([]);
     }
 
-    // ARCHIWUM (FIREBASE)
     function renderArchiwum() {
       const container = document.getElementById('archiwumList');
       if (archiwumList.length === 0) {
@@ -1308,7 +1269,6 @@
       }
     }
 
-    // SWITCH VIEWS
     function switchView(viewName) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
 
@@ -1332,12 +1292,10 @@
       }
     }
 
-    // START
     initApp();
     loadCatalog();
   </script>
 
-  <!-- REGISTRACJA SERVICE WORKERA -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

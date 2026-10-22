@@ -627,11 +627,11 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // 1. KLUCZ DLA GOOGLE DRIVE API (Pierwotny, działający do pobierania nut/audio)
+    // Klucz dedykowany do Google Drive API
     const DRIVE_API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
     const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
 
-    // 2. KLUCZ I KONFIGURACJA DLA FIREBASE (chor-psie-pole)
+    // Konfiguracja Firebase (chor-psie-pole) z obsługą błędów połączenia
     const firebaseConfig = {
       apiKey: "AIzaSyCa7IeaO36b7XBJA723CC4zJAjI6BgP5wQ",
       authDomain: "chor-psie-pole.firebaseapp.com",
@@ -665,31 +665,43 @@
         if (snapshot.exists()) {
           document.getElementById('announcementsContent').innerText = snapshot.val();
         }
+      }, (error) => {
+        console.error("Firebase Announcement Error:", error);
       });
 
       db.ref('repertuarList').on('value', (snapshot) => {
         repertuarList = snapshot.val() || [];
         renderRepertuar();
+      }, (error) => {
+        console.error("Firebase Repertuar Error:", error);
       });
 
       db.ref('naukaAssignments').on('value', (snapshot) => {
         naukaAssignments = snapshot.val() || [];
         renderNauka();
+      }, (error) => {
+        console.error("Firebase Nauka Error:", error);
       });
 
       db.ref('calendarEvents').on('value', (snapshot) => {
         calendarEvents = snapshot.val() || [];
         renderCalendar();
+      }, (error) => {
+        console.error("Firebase Calendar Error:", error);
       });
 
       db.ref('archiwumList').on('value', (snapshot) => {
         archiwumList = snapshot.val() || [];
         renderArchiwum();
+      }, (error) => {
+        console.error("Firebase Archiwum Error:", error);
       });
 
       db.ref('customLyrics').on('value', (snapshot) => {
         customLyrics = snapshot.val() || {};
         if (currentSongId) openSongDetail(currentSongId);
+      }, (error) => {
+        console.error("Firebase Lyrics Error:", error);
       });
     }
 
@@ -859,7 +871,6 @@
       db.ref('calendarEvents').set(calendarEvents);
     }
 
-    // POBIERANIE Z GOOGLE DRIVE PRZY UŻYCIU DEDYKOWANEGO DRIVE_API_KEY
     async function loadCatalog() {
       const statusEl = document.getElementById('status');
       statusEl.style.display = 'block';

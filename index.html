@@ -14,7 +14,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <meta name="theme-color" content="#e5e5e5" />
+  <meta name="theme-color" content="#dedede" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
 
   <!-- Google Fonts -->
@@ -24,13 +24,14 @@
 
   <style>
     :root {
-      --bg-color: #d8d8d8;
-      --card-bg: #e2e2e2;
-      --border-color: #888888;
-      --text-main: #111111;
-      --text-muted: #555555;
-      --btn-gray: #757575;
-      --btn-active: #222222;
+      --bg-color: #f1f1f1;
+      --card-bg: #ffffff;
+      --border-color: #dcdcdc;
+      --text-main: #222222;
+      --text-muted: #666666;
+      --accent-red: #c62828;
+      --shadow: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-active: 0 2px 3px rgba(0,0,0,0.1);
     }
 
     * {
@@ -41,21 +42,22 @@
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       padding-bottom: 30px;
     }
 
-    /* APP CONTAINER */
     .app-container {
       max-width: 600px;
       margin: 0 auto;
-      background: #e6e6e6;
+      background-color: #dedede;
       min-height: 100vh;
-      border-left: 1px solid #ccc;
-      border-right: 1px solid #ccc;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      position: relative;
       display: flex;
       flex-direction: column;
     }
@@ -64,65 +66,61 @@
     header {
       padding: 16px 12px 10px;
       background-color: #dedede;
-      border-bottom: 1px solid var(--border-color);
     }
 
-    /* VOICE BUTTONS BAR (TOP) */
     .voice-buttons-bar {
       display: flex;
       justify-content: center;
-      gap: 4px;
-      margin-bottom: 16px;
+      gap: 6px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
 
     .voice-btn {
-      background-color: var(--btn-gray);
+      background-color: #777777;
       color: #ffffff;
-      border: 1px solid #555;
-      padding: 6px 10px;
+      border: 1px solid #666666;
+      padding: 6px 14px;
       border-radius: 4px;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
       text-transform: uppercase;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.2);
       transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
     .voice-btn.active {
-      background-color: var(--btn-active);
-      border-color: #000;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+      background-color: #111111;
+      border-color: #000000;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .voice-btn.admin-btn {
-      background-color: #8b0000;
-      border-color: #550000;
+      background-color: var(--accent-red);
+      border-color: #900000;
     }
     .voice-btn.admin-btn.active {
-      background-color: #cc0000;
-      border-color: #000;
+      background-color: #ff1744;
+      border-color: #aa0000;
     }
 
-    /* TITLES */
     .header-titles {
       text-align: center;
-      margin-bottom: 16px;
     }
 
     .main-title-lg {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 800;
-      color: #111;
+      color: #000;
       margin-bottom: 2px;
     }
 
     .sub-title-md {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: #111;
-      margin-bottom: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 8px;
     }
 
     .tagline {
@@ -131,6 +129,15 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       color: #333;
+      margin-bottom: 12px;
+    }
+
+    /* GRAFIKA BEZ TŁA W MENU */
+    .chorus-graphic {
+      width: 90px;
+      margin: 0 auto 15px;
+      display: block;
+      opacity: 0.85;
     }
 
     /* LAYOUT VIEWS */
@@ -142,44 +149,42 @@
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* ICON TILES GRID (5 ICONS IN A ROW) */
+    /* TILES GRID */
     .tiles-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      margin-bottom: 24px;
+      gap: 8px;
+      margin-bottom: 20px;
       padding: 0 2px;
     }
 
     .tile-card {
-      background: #f0f0f0;
-      border: 1.5px solid #666;
-      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
       aspect-ratio: 1 / 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      transition: transform 0.15s ease, background-color 0.15s ease;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
 
-    .tile-card:active {
-      transform: scale(0.95);
-      background-color: #ddd;
-    }
+    .tile-card:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0,0,0,0.12); }
+    .tile-card:active { transform: translateY(1px); box-shadow: var(--shadow-active); background-color: #f0f0f0; }
 
     .tile-icon {
-      font-size: 1.3rem;
-      color: #111;
+      font-size: 1.5rem;
+      color: #111111;
     }
 
     /* OGŁOSZENIA BOX */
     .announcements-box {
-      border: 1.5px solid #666;
-      border-radius: 24px;
-      background-color: #f5f5f5;
+      border: 2px solid #555555;
+      border-radius: 20px;
+      background-color: #f7f7f7;
       min-height: 180px;
       padding: 20px;
       display: flex;
@@ -187,34 +192,39 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
       margin: 0 4px;
-      position: relative;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
     }
 
     .announcements-title {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 800;
       letter-spacing: 1.5px;
-      color: #444;
+      color: #111;
       text-transform: uppercase;
     }
 
     .announcements-content {
-      font-size: 0.9rem;
-      color: #333;
+      font-size: 0.95rem;
+      color: #222;
       margin-top: 10px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .edit-announcement-btn {
-      margin-top: 12px;
+      margin-top: 14px;
+      padding: 6px 14px;
       font-size: 0.75rem;
-      padding: 4px 10px;
+      font-weight: 700;
+      border: 1.5px solid #333333;
+      color: #333333;
+      background: #ffffff;
+      border-radius: 6px;
+      cursor: pointer;
       display: none;
     }
 
-    /* GENERAL BUTTONS & HEADERS IN SUBVIEWS */
+    /* GENERAL BUTTONS & HEADERS */
     .section-header-bar {
       display: flex;
       justify-content: space-between;
@@ -453,6 +463,16 @@
         <h1 class="main-title-lg">Chór Parafii Św. Jakuba i Krzysztofa</h1>
         <h2 class="sub-title-md">Wrocław Psie Pole</h2>
         <div class="tagline">ŚPIEWAJ ZE MNĄ!</div>
+
+        <!-- GRAFIKA BEZ TŁA (SVG) -->
+        <svg class="chorus-graphic" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M128 0H0V128H128V0Z" fill="none"/>
+          <path d="M43.6 88C35 88 28 81 28 72.4C28 63.8 35 56.8 43.6 56.8C52.2 56.8 59.2 63.8 59.2 72.4C59.2 81 52.2 88 43.6 88ZM43.6 62.8C38.3 62.8 34 67.1 34 72.4C34 77.7 38.3 82 43.6 82C48.9 82 53.2 77.7 53.2 72.4C53.2 67.1 48.9 62.8 43.6 62.8Z" fill="#111111"/>
+          <path d="M72.4 103.2V113.2H66.4V103.2H56.4V97.2H66.4V87.2H72.4V97.2H82.4V103.2H72.4Z" fill="#111111"/>
+          <path d="M43.6 44C38.3 44 34 39.7 34 34.4C34 29.1 38.3 24.8 43.6 24.8C48.9 24.8 53.2 29.1 53.2 34.4C53.2 39.7 48.9 44 43.6 44ZM43.6 30.8C41.6 30.8 40 32.4 40 34.4C40 36.4 41.6 38 43.6 38C45.6 38 47.2 36.4 47.2 34.4C47.2 32.4 45.6 30.8 43.6 30.8Z" fill="#111111"/>
+          <path d="M100 44C94.7 44 90.4 39.7 90.4 34.4C90.4 29.1 94.7 24.8 100 24.8C105.3 24.8 109.6 29.1 109.6 34.4C109.6 39.7 105.3 44 100 44ZM100 30.8C98 30.8 96.4 32.4 96.4 34.4C96.4 36.4 98 38 100 38C102 38 103.6 36.4 103.6 34.4C103.6 32.4 102 30.8 100 30.8Z" fill="#111111"/>
+          <path d="M84.4 88C75.8 88 68.8 81 68.8 72.4C68.8 63.8 75.8 56.8 84.4 56.8C93 56.8 100 63.8 100 72.4C100 81 93 88 84.4 88ZM84.4 62.8C79.1 62.8 74.8 67.1 74.8 72.4C74.8 77.7 79.1 82 84.4 82C89.7 82 94 77.7 94 72.4C94 67.1 89.7 62.8 84.4 62.8Z" fill="#111111"/>
+        </svg>
       </div>
     </header>
 
@@ -482,9 +502,9 @@
         <div class="announcements-box">
           <div class="announcements-title">OGŁOSZENIA</div>
           <div class="announcements-content" id="announcementsContent">
-            Brak nowych ogłoszeń. Próba chóru odbędzie się w najbliższy czwartek o 19:00.
+            Rozpoczynamy nowy sezon chóru parafialnego! Tym razem pragniemy, by przestał być on okazjonalny, dlatego będziemy się spotykać częściej!
           </div>
-          <button class="btn edit-announcement-btn" id="editAnnouncementBtn" onclick="editAnnouncement()">✏️ Edytuj ogłoszenie</button>
+          <button class="edit-announcement-btn" id="editAnnouncementBtn" onclick="editAnnouncement()">✏️ Edytuj ogłoszenie</button>
         </div>
       </div>
 
@@ -493,6 +513,7 @@
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
           <h2 class="section-title">Bieżący Repertuar</h2>
+          <div></div>
         </div>
 
         <div id="adminRepertuarControls" style="display:none; gap:10px; margin-bottom:14px;">
@@ -509,6 +530,7 @@
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
           <h2 class="section-title">Do Nauki</h2>
+          <div></div>
         </div>
 
         <div id="adminNaukaControls" style="display:none; gap:10px; margin-bottom:14px;">
@@ -522,6 +544,7 @@
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
           <h2 class="section-title">Cała Baza Utworów</h2>
+          <div></div>
         </div>
 
         <div id="adminDriveBtn" style="display:none; margin-bottom:12px;">
@@ -537,6 +560,7 @@
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
           <h2 class="section-title">Kalendarz</h2>
+          <div></div>
         </div>
         
         <div id="adminCalendarControls" style="display:none; margin-bottom:14px;">
@@ -572,6 +596,7 @@
         <div class="section-header-bar">
           <button class="btn" onclick="switchView('home')">← Powrót</button>
           <h2 class="section-title">Archiwum</h2>
+          <div></div>
         </div>
 
         <div id="archiwumList"></div>
@@ -1178,7 +1203,7 @@
       renderRepertuar();
     }
 
-    // ARCHIWUM - RENDERING I USUWANIE
+    // ARCHIWUM
     function renderArchiwum() {
       const container = document.getElementById('archiwumList');
       if (archiwumList.length === 0) {

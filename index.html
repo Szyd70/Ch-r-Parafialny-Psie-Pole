@@ -139,11 +139,11 @@
       display: block;
     }
 
-    main { 
-      padding: 16px; 
+    main {
+      padding: 16px;
       flex: 1;
     }
-    
+
     .view-section { display: none; }
     .view-section.active { display: block; }
 
@@ -341,6 +341,7 @@
       background-color: #ffffff;
       z-index: 100;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 16px;
       display: none;
       flex-direction: column;
@@ -354,6 +355,7 @@
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
+      flex-shrink: 0;
     }
 
     .song-title-lg {
@@ -375,13 +377,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 280px;
-      touch-action: none;
+      flex-shrink: 0;
+      touch-action: pan-y pinch-zoom;
     }
 
     .sheet-img {
-      max-width: 100%;
+      width: 100%;
       height: auto;
+      display: block;
       transition: transform 0.05s ease-out;
       transform-origin: center center;
       cursor: grab;
@@ -415,6 +418,7 @@
       border: 1px solid #777;
       border-radius: 8px;
       padding: 12px;
+      flex-shrink: 0;
     }
 
     .audio-track { margin-bottom: 8px; }
@@ -436,6 +440,7 @@
       line-height: 1.6;
       color: #222;
       position: relative;
+      flex-shrink: 0;
     }
 
     .status-msg {
@@ -453,6 +458,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .piano-keyboard-grid {
@@ -585,10 +591,10 @@
           <h2 class="section-title">Kalendarz</h2>
           <div></div>
         </div>
-        
+
         <div id="adminCalendarControls" style="display:none; margin-bottom:14px;">
           <button class="btn btn-primary" style="width:100%;" onclick="toggleCalendarForm()">+ Dodaj wydarzenie / cykl</button>
-          
+
           <div id="calendarFormCard" class="event-form-card" style="display:none; margin-top:10px;">
             <strong>Nowe wydarzenie / spotkanie:</strong>
             <input type="text" id="evTitle" placeholder="Tytuł (np. Próba chóru)" />
@@ -596,7 +602,7 @@
               <input type="date" id="evStartDate" style="flex:1;" />
               <input type="time" id="evTime" value="19:00" style="width:90px;" />
             </div>
-            
+
             <label style="font-size:0.8rem; font-weight:700; color:#444; margin-top:2px;">Powtarzalność:</label>
             <select id="evRecurrence">
               <option value="NONE">Jednorazowo</option>
@@ -677,7 +683,7 @@
       <div id="detailAudioList"></div>
     </div>
 
-    <div style="position:relative;">
+    <div style="position:relative; flex-shrink:0;">
       <div id="detailLyricsSection" class="lyrics-box" style="display:none;"></div>
       <button class="btn" id="editLyricsBtn" style="position:absolute; top:8px; right:8px; display:none; font-size:0.7rem;" onclick="editSongLyrics()">✏️ Edytuj tekst</button>
     </div>
@@ -761,11 +767,19 @@
       panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'flex' : 'none';
     }
 
+    function updateSheetTouchAction() {
+      const container = document.getElementById('sheetContainer');
+      if (container) {
+        container.style.touchAction = currentZoom > 1 ? 'none' : 'pan-y pinch-zoom';
+      }
+    }
+
     function applyTransform() {
       const sheetImg = document.getElementById('detailSheet');
       if (sheetImg) {
         sheetImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
       }
+      updateSheetTouchAction();
     }
 
     function zoomSheet(delta) {
@@ -785,7 +799,6 @@
       applyTransform();
     }
 
-    // Obsługa przesuwania i dotyku dla nut
     const sheetContainer = document.getElementById('sheetContainer');
 
     sheetContainer.addEventListener('touchstart', (e) => {
@@ -1048,7 +1061,7 @@
       statusEl.style.display = 'block';
 
       const cacheBuster = `&_cb=${Date.now()}`;
-      
+
       try {
         const folderQuery = `'${MAIN_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`;
         const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${DRIVE_API_KEY}${cacheBuster}`;
@@ -1076,7 +1089,7 @@
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
 
         statusEl.style.display = 'none';
-        
+
         renderRepertuar();
         renderBaza();
         renderNauka();
@@ -1211,12 +1224,16 @@
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
       document.getElementById('pitchPanel').style.display = 'none';
 
+      const detailView = document.getElementById('viewSongDetail');
+      detailView.scrollTop = 0;
+
+      const sheetContainerEl = document.getElementById('sheetContainer');
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {
         sheetImg.src = song.sheetUrl;
-        sheetImg.style.display = 'block';
+        sheetContainerEl.style.display = 'flex';
       } else {
-        sheetImg.style.display = 'none';
+        sheetContainerEl.style.display = 'none';
       }
       resetZoom();
 
@@ -1274,7 +1291,7 @@
         naukaBtn.style.display = 'none';
       }
 
-      document.getElementById('viewSongDetail').classList.add('active');
+      detailView.classList.add('active');
     }
 
     function closeSongDetail() {

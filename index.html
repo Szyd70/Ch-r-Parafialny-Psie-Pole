@@ -370,6 +370,7 @@
     .sheet-container {
       position: relative;
       width: 100%;
+      min-height: 200px;
       background-color: #eee;
       border: 1px solid #777;
       border-radius: 8px;
@@ -1218,7 +1219,10 @@
 
     function openSongDetail(songId) {
       currentSongId = songId;
-      const song = allSongs.find(s => s.id === songId);
+      let song = allSongs.find(s => s.id === songId);
+      if (!song) {
+        song = repertuarList.find(s => s.id === songId);
+      }
       if (!song) return;
 
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
@@ -1230,9 +1234,18 @@
       const sheetContainerEl = document.getElementById('sheetContainer');
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {
+        sheetImg.onload = () => {
+          sheetImg.style.display = 'block';
+        };
+        sheetImg.onerror = () => {
+          sheetImg.style.display = 'none';
+        };
         sheetImg.src = song.sheetUrl;
+        sheetImg.style.display = 'block';
         sheetContainerEl.style.display = 'flex';
       } else {
+        sheetImg.removeAttribute('src');
+        sheetImg.style.display = 'none';
         sheetContainerEl.style.display = 'none';
       }
       resetZoom();
@@ -1240,7 +1253,7 @@
       const audioSec = document.getElementById('detailAudioSection');
       const audioListEl = document.getElementById('detailAudioList');
 
-      const filteredAudio = song.audioTracks.filter(track => {
+      const filteredAudio = (song.audioTracks || []).filter(track => {
         if (currentUserVoice === 'NONE' || currentUserVoice === 'ADMIN' || !currentUserVoice) return true;
         return track.voice === 'TUTTI' || track.voice === currentUserVoice;
       });

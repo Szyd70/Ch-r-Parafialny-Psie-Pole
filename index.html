@@ -1094,6 +1094,10 @@
         renderBaza();
         renderNauka();
         renderArchiwum();
+
+        if (currentSongId && document.getElementById('viewSongDetail').classList.contains('active')) {
+          openSongDetail(currentSongId);
+        }
       } catch (err) {
         console.error('Błąd Drive:', err);
         statusEl.innerText = 'Błąd podczas ładowania bazy utworów z Google Drive.';
@@ -1218,7 +1222,11 @@
 
     function openSongDetail(songId) {
       currentSongId = songId;
-      const song = allSongs.find(s => s.id === songId);
+      let song = allSongs.find(s => s.id === songId);
+      const fallbackSong = repertuarList.find(s => s.id === songId);
+      if (!song && fallbackSong) {
+        song = allSongs.find(s => s.title.toLowerCase() === fallbackSong.title.toLowerCase()) || fallbackSong;
+      }
       if (!song) return;
 
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
@@ -1231,8 +1239,10 @@
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {
         sheetImg.src = song.sheetUrl;
+        sheetImg.style.display = 'block';
         sheetContainerEl.style.display = 'flex';
       } else {
+        sheetImg.removeAttribute('src');
         sheetContainerEl.style.display = 'none';
       }
       resetZoom();
@@ -1240,7 +1250,7 @@
       const audioSec = document.getElementById('detailAudioSection');
       const audioListEl = document.getElementById('detailAudioList');
 
-      const filteredAudio = song.audioTracks.filter(track => {
+      const filteredAudio = (song.audioTracks || []).filter(track => {
         if (currentUserVoice === 'NONE' || currentUserVoice === 'ADMIN' || !currentUserVoice) return true;
         return track.voice === 'TUTTI' || track.voice === currentUserVoice;
       });
@@ -1259,7 +1269,7 @@
 
       const lyricsSec = document.getElementById('detailLyricsSection');
       const editLyricsBtn = document.getElementById('editLyricsBtn');
-      const activeLyrics = customLyrics[songId] || song.lyricsText;
+      const activeLyrics = customLyrics[song.id] || customLyrics[songId] || song.lyricsText;
 
       if (activeLyrics) {
         lyricsSec.innerText = activeLyrics;

@@ -422,7 +422,7 @@
       flex-shrink: 0;
     }
 
-    .audio-track { margin-bottom: 8px; }
+    .audio-track { margin-bottom: 10px; }
     .audio-track label {
       display: block;
       font-size: 0.78rem;
@@ -1095,6 +1095,10 @@
         renderBaza();
         renderNauka();
         renderArchiwum();
+
+        if (currentSongId && document.getElementById('viewSongDetail').classList.contains('active')) {
+          openSongDetail(currentSongId);
+        }
       } catch (err) {
         console.error('Błąd Drive:', err);
         statusEl.innerText = 'Błąd podczas ładowania bazy utworów z Google Drive.';
@@ -1103,14 +1107,16 @@
 
     async function parseSongFolder(folderId, folderName, files) {
       let sheetUrl = null;
+      let sheetFallbackUrl = null;
       let lyricsText = null;
       let audioTracks = [];
 
       for (const file of files) {
-        const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${DRIVE_API_KEY}`;
+        const apiStreamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${DRIVE_API_KEY}`;
 
         if (file.mimeType.includes('image/')) {
-          sheetUrl = streamUrl;
+          sheetUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1600`;
+          sheetFallbackUrl = apiStreamUrl;
         } else if (file.mimeType.includes('audio/')) {
           const nameLower = file.name.toLowerCase();
           let voice = 'TUTTI';
@@ -1120,10 +1126,15 @@
           else if (nameLower.includes('tenor') || nameLower.includes('- t.')) voice = 'TENOR';
           else if (nameLower.includes('bas') || nameLower.includes('- b.')) voice = 'BAS';
 
-          audioTracks.push({ voice, label: getVoiceLabel(voice), url: streamUrl });
+          audioTracks.push({
+            voice,
+            label: getVoiceLabel(voice),
+            url: apiStreamUrl,
+            fallbackUrl: `https://drive.google.com/uc?export=download&id=${file.id}`
+          });
         } else if (file.name.endsWith('.txt')) {
           try {
-            const txtRes = await fetch(streamUrl);
+            const txtRes = await fetch(apiStreamUrl);
             if (txtRes.ok) lyricsText = await txtRes.text();
           } catch(e) {}
         }
@@ -1133,6 +1144,7 @@
         id: folderId,
         title: folderName,
         sheetUrl,
+        sheetFallbackUrl,
         audioTracks,
         lyricsText
       };
@@ -1217,11 +1229,20 @@
       `;
     }
 
+    function handleAudioError(audioEl, fallbackUrl) {
+      if (!audioEl.dataset.triedFallback && fallbackUrl) {
+        audioEl.dataset.triedFallback = '1';
+        audioEl.src = fallbackUrl;
+        audioEl.load();
+      }
+    }
+
     function openSongDetail(songId) {
       currentSongId = songId;
       let song = allSongs.find(s => s.id === songId);
-      if (!song) {
-        song = repertuarList.find(s => s.id === songId);
+      const fallbackSong = repertuarList.find(s => s.id === songId);
+      if (!song && fallbackSong) {
+        song = allSongs.find(s => s.title.toLowerCase() === fallbackSong.title.toLowerCase()) || fallbackSong;
       }
       if (!song) return;
 
@@ -1234,11 +1255,17 @@
       const sheetContainerEl = document.getElementById('sheetContainer');
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {
+        sheetImg.dataset.triedFallback = '';
         sheetImg.onload = () => {
           sheetImg.style.display = 'block';
         };
         sheetImg.onerror = () => {
-          sheetImg.style.display = 'none';
+          if (!sheetImg.dataset.triedFallback && song.sheetFallbackUrl) {
+            sheetImg.dataset.triedFallback = '1';
+            sheetImg.src = song.sheetFallbackUrl;
+          } else {
+            sheetImg.style.display = 'none';
+          }
         };
         sheetImg.src = song.sheetUrl;
         sheetImg.style.display = 'block';
@@ -1263,7 +1290,7 @@
         audioListEl.innerHTML = filteredAudio.map(track => `
           <div class="audio-track">
             <label>${track.label}</label>
-            <audio controls crossorigin="anonymous" preload="metadata" src="${track.url}"></audio>
+            <audio controls preload="metadata" src="${track.url}" onerror="handleAudioError(this, '${track.fallbackUrl || ''}')"></audio>
           </div>
         `).join('');
       } else {
@@ -1272,7 +1299,7 @@
 
       const lyricsSec = document.getElementById('detailLyricsSection');
       const editLyricsBtn = document.getElementById('editLyricsBtn');
-      const activeLyrics = customLyrics[songId] || song.lyricsText;
+      const activeLyrics = customLyrics[song.id] || customLyrics[songId] || song.lyricsText;
 
       if (activeLyrics) {
         lyricsSec.innerText = activeLyrics;

@@ -139,11 +139,11 @@
       display: block;
     }
 
-    main { 
-      padding: 16px; 
+    main {
+      padding: 16px;
       flex: 1;
     }
-    
+
     .view-section { display: none; }
     .view-section.active { display: block; }
 
@@ -341,6 +341,7 @@
       background-color: #ffffff;
       z-index: 100;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 16px;
       display: none;
       flex-direction: column;
@@ -354,6 +355,7 @@
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
+      flex-shrink: 0;
     }
 
     .song-title-lg {
@@ -375,15 +377,20 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 280px;
-      touch-action: none;
+      flex-shrink: 0;
+      touch-action: pan-y pinch-zoom;
     }
 
     .sheet-img {
-      max-width: 100%;
+      width: 100%;
       height: auto;
-      transition: transform 0.1s ease-out;
+      display: block;
+      transition: transform 0.05s ease-out;
       transform-origin: center center;
+      cursor: grab;
+    }
+    .sheet-img:active {
+      cursor: grabbing;
     }
 
     .zoom-controls {
@@ -411,6 +418,7 @@
       border: 1px solid #777;
       border-radius: 8px;
       padding: 12px;
+      flex-shrink: 0;
     }
 
     .audio-track { margin-bottom: 8px; }
@@ -432,6 +440,7 @@
       line-height: 1.6;
       color: #222;
       position: relative;
+      flex-shrink: 0;
     }
 
     .status-msg {
@@ -449,9 +458,9 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      flex-shrink: 0;
     }
 
-    /* Układ klawiatury fortepianowej w siatce 14-kolumnowej */
     .piano-keyboard-grid {
       display: grid;
       grid-template-columns: repeat(14, 1fr);
@@ -582,10 +591,10 @@
           <h2 class="section-title">Kalendarz</h2>
           <div></div>
         </div>
-        
+
         <div id="adminCalendarControls" style="display:none; margin-bottom:14px;">
           <button class="btn btn-primary" style="width:100%;" onclick="toggleCalendarForm()">+ Dodaj wydarzenie / cykl</button>
-          
+
           <div id="calendarFormCard" class="event-form-card" style="display:none; margin-top:10px;">
             <strong>Nowe wydarzenie / spotkanie:</strong>
             <input type="text" id="evTitle" placeholder="Tytuł (np. Próba chóru)" />
@@ -593,7 +602,7 @@
               <input type="date" id="evStartDate" style="flex:1;" />
               <input type="time" id="evTime" value="19:00" style="width:90px;" />
             </div>
-            
+
             <label style="font-size:0.8rem; font-weight:700; color:#444; margin-top:2px;">Powtarzalność:</label>
             <select id="evRecurrence">
               <option value="NONE">Jednorazowo</option>
@@ -636,9 +645,8 @@
       </div>
     </div>
 
-    <!-- PANEL INTONACJI / KAMERTONU (Pianino: układy klawiszy 2+3, czarne tło dla półtonów, jasne tło dla A) -->
+    <!-- PANEL INTONACJI / KAMERTONU -->
     <div id="pitchPanel" class="pitch-panel" style="display:none;">
-      <!-- Rząd czarnych klawiszy (grupowanie po 2 i 3 półtony) -->
       <div class="piano-keyboard-grid">
         <div style="grid-column: span 1;"></div>
         <button class="btn btn-black pitch-btn" style="grid-column: span 2;" onclick="playTone(277.18)">C#</button>
@@ -650,7 +658,6 @@
         <div style="grid-column: span 1;"></div>
       </div>
 
-      <!-- Rząd białych klawiszy (wszystkie jasne) -->
       <div class="piano-keyboard-grid">
         <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(261.63)">C</button>
         <button class="btn pitch-btn" style="grid-column: span 2;" onclick="playTone(293.66)">D</button>
@@ -676,7 +683,7 @@
       <div id="detailAudioList"></div>
     </div>
 
-    <div style="position:relative;">
+    <div style="position:relative; flex-shrink:0;">
       <div id="detailLyricsSection" class="lyrics-box" style="display:none;"></div>
       <button class="btn" id="editLyricsBtn" style="position:absolute; top:8px; right:8px; display:none; font-size:0.7rem;" onclick="editSongLyrics()">✏️ Edytuj tekst</button>
     </div>
@@ -687,11 +694,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // Klucz dedykowany do Google Drive API
     const DRIVE_API_KEY = 'AIzaSyDM3V9xJhY4AO2V3MaFN6MZIufi0OqGOCk';
     const MAIN_FOLDER_ID = '1YR4rFWK9-DOZLwguXoQZnzkQkZ6m5vt-';
 
-    // Konfiguracja Firebase (chor-psie-pole) z poprawnym europejskim adresem bazy
     const firebaseConfig = {
       apiKey: "AIzaSyCa7IeaO36b7XBJA723CC4zJAjI6BgP5wQ",
       authDomain: "chor-psie-pole.firebaseapp.com",
@@ -717,10 +722,17 @@
 
     let currentUserVoice = localStorage.getItem('userVoice') || 'NONE';
     let isAdmin = false;
-    let currentZoom = 1;
-    let currentSongId = null;
 
-    // WEB AUDIO API - GENERATOR DŹWIĘKU (INTONACJA - Czas trwania: 1 sekunda)
+    // Zoom i Przesuwanie (Pan/Drag)
+    let currentZoom = 1;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let initialDist = 0;
+
+    let currentSongId = null;
     let audioCtx = null;
 
     function playTone(freq) {
@@ -735,10 +747,9 @@
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
 
-      osc.type = 'sine'; // Czysta fala sinusoidalna kamertonu
+      osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-      // Płynna głośność (attack i release) przez dokładnie 1 sekundę
       gain.gain.setValueAtTime(0, audioCtx.currentTime);
       gain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 0.05);
       gain.gain.setValueAtTime(0.25, audioCtx.currentTime + 0.9);
@@ -756,48 +767,126 @@
       panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'flex' : 'none';
     }
 
+    function updateSheetTouchAction() {
+      const container = document.getElementById('sheetContainer');
+      if (container) {
+        container.style.touchAction = currentZoom > 1 ? 'none' : 'pan-y pinch-zoom';
+      }
+    }
+
+    function applyTransform() {
+      const sheetImg = document.getElementById('detailSheet');
+      if (sheetImg) {
+        sheetImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+      }
+      updateSheetTouchAction();
+    }
+
+    function zoomSheet(delta) {
+      const newZoom = Math.max(1, Math.min(4, currentZoom + delta));
+      if (newZoom === 1) {
+        panX = 0;
+        panY = 0;
+      }
+      currentZoom = newZoom;
+      applyTransform();
+    }
+
+    function resetZoom() {
+      currentZoom = 1;
+      panX = 0;
+      panY = 0;
+      applyTransform();
+    }
+
+    const sheetContainer = document.getElementById('sheetContainer');
+
+    sheetContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1 && currentZoom > 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX - panX;
+        startY = e.touches[0].clientY - panY;
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        initialDist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+      }
+    }, { passive: true });
+
+    sheetContainer.addEventListener('touchmove', (e) => {
+      if (isDragging && e.touches.length === 1 && currentZoom > 1) {
+        panX = e.touches[0].clientX - startX;
+        panY = e.touches[0].clientY - startY;
+        applyTransform();
+      } else if (e.touches.length === 2 && initialDist > 0) {
+        const dist = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const factor = dist / initialDist;
+        zoomSheet((factor - 1) * 0.1);
+        initialDist = dist;
+      }
+    }, { passive: true });
+
+    sheetContainer.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) initialDist = 0;
+      if (e.touches.length === 0) isDragging = false;
+    });
+
+    sheetContainer.addEventListener('mousedown', (e) => {
+      if (currentZoom > 1) {
+        isDragging = true;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging && currentZoom > 1) {
+        e.preventDefault();
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        applyTransform();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
     function setupCloudSync() {
       db.ref('announcementsText').on('value', (snapshot) => {
         if (snapshot.exists()) {
           document.getElementById('announcementsContent').innerText = snapshot.val();
         }
-      }, (error) => {
-        console.error("Firebase Announcement Error:", error);
       });
 
       db.ref('repertuarList').on('value', (snapshot) => {
         repertuarList = snapshot.val() || [];
         renderRepertuar();
-      }, (error) => {
-        console.error("Firebase Repertuar Error:", error);
       });
 
       db.ref('naukaAssignments').on('value', (snapshot) => {
         naukaAssignments = snapshot.val() || [];
         renderNauka();
-      }, (error) => {
-        console.error("Firebase Nauka Error:", error);
       });
 
       db.ref('calendarEvents').on('value', (snapshot) => {
         calendarEvents = snapshot.val() || [];
         renderCalendar();
-      }, (error) => {
-        console.error("Firebase Calendar Error:", error);
       });
 
       db.ref('archiwumList').on('value', (snapshot) => {
         archiwumList = snapshot.val() || [];
         renderArchiwum();
-      }, (error) => {
-        console.error("Firebase Archiwum Error:", error);
       });
 
       db.ref('customLyrics').on('value', (snapshot) => {
         customLyrics = snapshot.val() || {};
         if (currentSongId) openSongDetail(currentSongId);
-      }, (error) => {
-        console.error("Firebase Lyrics Error:", error);
       });
     }
 
@@ -972,7 +1061,7 @@
       statusEl.style.display = 'block';
 
       const cacheBuster = `&_cb=${Date.now()}`;
-      
+
       try {
         const folderQuery = `'${MAIN_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`;
         const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${DRIVE_API_KEY}${cacheBuster}`;
@@ -1000,7 +1089,7 @@
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
 
         statusEl.style.display = 'none';
-        
+
         renderRepertuar();
         renderBaza();
         renderNauka();
@@ -1133,16 +1222,18 @@
       if (!song) return;
 
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
-
-      // Domyślnie ukryj panel intonacji po otwarciu
       document.getElementById('pitchPanel').style.display = 'none';
 
+      const detailView = document.getElementById('viewSongDetail');
+      detailView.scrollTop = 0;
+
+      const sheetContainerEl = document.getElementById('sheetContainer');
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {
         sheetImg.src = song.sheetUrl;
-        sheetImg.style.display = 'block';
+        sheetContainerEl.style.display = 'flex';
       } else {
-        sheetImg.style.display = 'none';
+        sheetContainerEl.style.display = 'none';
       }
       resetZoom();
 
@@ -1200,7 +1291,7 @@
         naukaBtn.style.display = 'none';
       }
 
-      document.getElementById('viewSongDetail').classList.add('active');
+      detailView.classList.add('active');
     }
 
     function closeSongDetail() {
@@ -1221,40 +1312,6 @@
         }
       }
     }
-
-    function zoomSheet(delta) {
-      currentZoom = Math.max(0.8, Math.min(3, currentZoom + delta));
-      document.getElementById('detailSheet').style.transform = `scale(${currentZoom})`;
-    }
-
-    function resetZoom() {
-      currentZoom = 1;
-      document.getElementById('detailSheet').style.transform = 'scale(1)';
-    }
-
-    let initialDist = 0;
-    const sheetContainer = document.getElementById('sheetContainer');
-
-    sheetContainer.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 2) {
-        initialDist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-      }
-    });
-
-    sheetContainer.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 2 && initialDist > 0) {
-        const dist = Math.hypot(
-          e.touches[0].pageX - e.touches[1].pageX,
-          e.touches[0].pageY - e.touches[1].pageY
-        );
-        const factor = dist / initialDist;
-        zoomSheet((factor - 1) * 0.1);
-        initialDist = dist;
-      }
-    });
 
     function toggleRepertuar(songId) {
       if (!isAdmin) return;

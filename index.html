@@ -139,11 +139,11 @@
       display: block;
     }
 
-    main {
-      padding: 16px;
+    main { 
+      padding: 16px; 
       flex: 1;
     }
-
+    
     .view-section { display: none; }
     .view-section.active { display: block; }
 
@@ -341,7 +341,6 @@
       background-color: #ffffff;
       z-index: 100;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
       padding: 16px;
       display: none;
       flex-direction: column;
@@ -355,7 +354,6 @@
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
-      flex-shrink: 0;
     }
 
     .song-title-lg {
@@ -370,7 +368,6 @@
     .sheet-container {
       position: relative;
       width: 100%;
-      min-height: 200px;
       background-color: #eee;
       border: 1px solid #777;
       border-radius: 8px;
@@ -378,14 +375,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-shrink: 0;
-      touch-action: pan-y pinch-zoom;
+      min-height: 280px;
+      touch-action: none;
     }
 
     .sheet-img {
-      width: 100%;
+      max-width: 100%;
       height: auto;
-      display: block;
       transition: transform 0.05s ease-out;
       transform-origin: center center;
       cursor: grab;
@@ -419,10 +415,9 @@
       border: 1px solid #777;
       border-radius: 8px;
       padding: 12px;
-      flex-shrink: 0;
     }
 
-    .audio-track { margin-bottom: 10px; }
+    .audio-track { margin-bottom: 8px; }
     .audio-track label {
       display: block;
       font-size: 0.78rem;
@@ -441,7 +436,6 @@
       line-height: 1.6;
       color: #222;
       position: relative;
-      flex-shrink: 0;
     }
 
     .status-msg {
@@ -459,7 +453,6 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      flex-shrink: 0;
     }
 
     .piano-keyboard-grid {
@@ -592,10 +585,10 @@
           <h2 class="section-title">Kalendarz</h2>
           <div></div>
         </div>
-
+        
         <div id="adminCalendarControls" style="display:none; margin-bottom:14px;">
           <button class="btn btn-primary" style="width:100%;" onclick="toggleCalendarForm()">+ Dodaj wydarzenie / cykl</button>
-
+          
           <div id="calendarFormCard" class="event-form-card" style="display:none; margin-top:10px;">
             <strong>Nowe wydarzenie / spotkanie:</strong>
             <input type="text" id="evTitle" placeholder="Tytuł (np. Próba chóru)" />
@@ -603,7 +596,7 @@
               <input type="date" id="evStartDate" style="flex:1;" />
               <input type="time" id="evTime" value="19:00" style="width:90px;" />
             </div>
-
+            
             <label style="font-size:0.8rem; font-weight:700; color:#444; margin-top:2px;">Powtarzalność:</label>
             <select id="evRecurrence">
               <option value="NONE">Jednorazowo</option>
@@ -684,7 +677,7 @@
       <div id="detailAudioList"></div>
     </div>
 
-    <div style="position:relative; flex-shrink:0;">
+    <div style="position:relative;">
       <div id="detailLyricsSection" class="lyrics-box" style="display:none;"></div>
       <button class="btn" id="editLyricsBtn" style="position:absolute; top:8px; right:8px; display:none; font-size:0.7rem;" onclick="editSongLyrics()">✏️ Edytuj tekst</button>
     </div>
@@ -768,19 +761,11 @@
       panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'flex' : 'none';
     }
 
-    function updateSheetTouchAction() {
-      const container = document.getElementById('sheetContainer');
-      if (container) {
-        container.style.touchAction = currentZoom > 1 ? 'none' : 'pan-y pinch-zoom';
-      }
-    }
-
     function applyTransform() {
       const sheetImg = document.getElementById('detailSheet');
       if (sheetImg) {
         sheetImg.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
       }
-      updateSheetTouchAction();
     }
 
     function zoomSheet(delta) {
@@ -800,6 +785,7 @@
       applyTransform();
     }
 
+    // Obsługa przesuwania i dotyku dla nut
     const sheetContainer = document.getElementById('sheetContainer');
 
     sheetContainer.addEventListener('touchstart', (e) => {
@@ -1062,7 +1048,7 @@
       statusEl.style.display = 'block';
 
       const cacheBuster = `&_cb=${Date.now()}`;
-
+      
       try {
         const folderQuery = `'${MAIN_FOLDER_ID}' in parents and trashed = false and mimeType = 'application/vnd.google-apps.folder'`;
         const folderUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(folderQuery)}&fields=files(id,name)&pageSize=100&key=${DRIVE_API_KEY}${cacheBuster}`;
@@ -1090,15 +1076,11 @@
         allSongs.sort((a, b) => a.title.localeCompare(b.title, 'pl'));
 
         statusEl.style.display = 'none';
-
+        
         renderRepertuar();
         renderBaza();
         renderNauka();
         renderArchiwum();
-
-        if (currentSongId && document.getElementById('viewSongDetail').classList.contains('active')) {
-          openSongDetail(currentSongId);
-        }
       } catch (err) {
         console.error('Błąd Drive:', err);
         statusEl.innerText = 'Błąd podczas ładowania bazy utworów z Google Drive.';
@@ -1107,16 +1089,14 @@
 
     async function parseSongFolder(folderId, folderName, files) {
       let sheetUrl = null;
-      let sheetFallbackUrl = null;
       let lyricsText = null;
       let audioTracks = [];
 
       for (const file of files) {
-        const apiStreamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${DRIVE_API_KEY}`;
+        const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${DRIVE_API_KEY}`;
 
         if (file.mimeType.includes('image/')) {
-          sheetUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1600`;
-          sheetFallbackUrl = apiStreamUrl;
+          sheetUrl = streamUrl;
         } else if (file.mimeType.includes('audio/')) {
           const nameLower = file.name.toLowerCase();
           let voice = 'TUTTI';
@@ -1126,15 +1106,10 @@
           else if (nameLower.includes('tenor') || nameLower.includes('- t.')) voice = 'TENOR';
           else if (nameLower.includes('bas') || nameLower.includes('- b.')) voice = 'BAS';
 
-          audioTracks.push({
-            voice,
-            label: getVoiceLabel(voice),
-            url: apiStreamUrl,
-            fallbackUrl: `https://drive.google.com/uc?export=download&id=${file.id}`
-          });
+          audioTracks.push({ voice, label: getVoiceLabel(voice), url: streamUrl });
         } else if (file.name.endsWith('.txt')) {
           try {
-            const txtRes = await fetch(apiStreamUrl);
+            const txtRes = await fetch(streamUrl);
             if (txtRes.ok) lyricsText = await txtRes.text();
           } catch(e) {}
         }
@@ -1144,7 +1119,6 @@
         id: folderId,
         title: folderName,
         sheetUrl,
-        sheetFallbackUrl,
         audioTracks,
         lyricsText
       };
@@ -1229,58 +1203,27 @@
       `;
     }
 
-    function handleAudioError(audioEl, fallbackUrl) {
-      if (!audioEl.dataset.triedFallback && fallbackUrl) {
-        audioEl.dataset.triedFallback = '1';
-        audioEl.src = fallbackUrl;
-        audioEl.load();
-      }
-    }
-
     function openSongDetail(songId) {
       currentSongId = songId;
-      let song = allSongs.find(s => s.id === songId);
-      const fallbackSong = repertuarList.find(s => s.id === songId);
-      if (!song && fallbackSong) {
-        song = allSongs.find(s => s.title.toLowerCase() === fallbackSong.title.toLowerCase()) || fallbackSong;
-      }
+      const song = allSongs.find(s => s.id === songId);
       if (!song) return;
 
       document.getElementById('detailTitle').innerText = song.title.toUpperCase();
       document.getElementById('pitchPanel').style.display = 'none';
 
-      const detailView = document.getElementById('viewSongDetail');
-      detailView.scrollTop = 0;
-
-      const sheetContainerEl = document.getElementById('sheetContainer');
       const sheetImg = document.getElementById('detailSheet');
       if (song.sheetUrl) {
-        sheetImg.dataset.triedFallback = '';
-        sheetImg.onload = () => {
-          sheetImg.style.display = 'block';
-        };
-        sheetImg.onerror = () => {
-          if (!sheetImg.dataset.triedFallback && song.sheetFallbackUrl) {
-            sheetImg.dataset.triedFallback = '1';
-            sheetImg.src = song.sheetFallbackUrl;
-          } else {
-            sheetImg.style.display = 'none';
-          }
-        };
         sheetImg.src = song.sheetUrl;
         sheetImg.style.display = 'block';
-        sheetContainerEl.style.display = 'flex';
       } else {
-        sheetImg.removeAttribute('src');
         sheetImg.style.display = 'none';
-        sheetContainerEl.style.display = 'none';
       }
       resetZoom();
 
       const audioSec = document.getElementById('detailAudioSection');
       const audioListEl = document.getElementById('detailAudioList');
 
-      const filteredAudio = (song.audioTracks || []).filter(track => {
+      const filteredAudio = song.audioTracks.filter(track => {
         if (currentUserVoice === 'NONE' || currentUserVoice === 'ADMIN' || !currentUserVoice) return true;
         return track.voice === 'TUTTI' || track.voice === currentUserVoice;
       });
@@ -1290,7 +1233,7 @@
         audioListEl.innerHTML = filteredAudio.map(track => `
           <div class="audio-track">
             <label>${track.label}</label>
-            <audio controls preload="metadata" src="${track.url}" onerror="handleAudioError(this, '${track.fallbackUrl || ''}')"></audio>
+            <audio controls crossorigin="anonymous" preload="metadata" src="${track.url}"></audio>
           </div>
         `).join('');
       } else {
@@ -1299,7 +1242,7 @@
 
       const lyricsSec = document.getElementById('detailLyricsSection');
       const editLyricsBtn = document.getElementById('editLyricsBtn');
-      const activeLyrics = customLyrics[song.id] || customLyrics[songId] || song.lyricsText;
+      const activeLyrics = customLyrics[songId] || song.lyricsText;
 
       if (activeLyrics) {
         lyricsSec.innerText = activeLyrics;
@@ -1331,7 +1274,7 @@
         naukaBtn.style.display = 'none';
       }
 
-      detailView.classList.add('active');
+      document.getElementById('viewSongDetail').classList.add('active');
     }
 
     function closeSongDetail() {
